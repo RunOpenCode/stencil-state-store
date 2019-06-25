@@ -26,7 +26,6 @@ export function Provide(options: ProvideOptions) {
                         enumerable: false,
                         writable:   false
                     });
-                    // this[field] = new Store(options.defaults);
                 }
 
                 return this[field];

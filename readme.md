@@ -71,6 +71,11 @@ export class Carousel {
 Component `runopencode-carousel-pager` can consume that state store:
 
 ````
+import {Component, h}               from "@stencil/core";
+import {Provide, StoreInterface}    from "@runopencode/stencil-state-store";
+import {CarouselState}              from "./state";
+import {Unsubscribable}             from "rxjs";
+
 @Component({
     tag:    'runopencode-carousel-pager',
     shadow: true,
@@ -105,3 +110,78 @@ export class CarouselPager {
 }
 ````
 
+So, there is one few classes, decorators and interfaces involved here.
+
+1. You need to define your state interface. It is simple key, value pair, defined by following:
+
+````
+interface MyState {
+    [key: string]: any
+}
+````
+
+2. You have to provide your state store, with default values and unique name from parent component:
+
+````
+
+@Provide({
+    name:     'runopencode-carousel',
+    defaults: [DEFAULT VALUE FOR YOUR STATE]
+})
+public store: StoreInterface<MyState>;
+
+````
+3. You have to consume your state
+
+````
+@Consume({
+    name:     'runopencode-carousel',
+    callback:  (store: StoreInterface<MyState>) => {
+        store.subscribe(...)
+    }
+})
+public store: StoreInterface<ComponentState>;
+````
+
+Note that you can consume store trough component property, as well as trough component method. 
+If you are using a property for consumption, you can define a callback to invoke when store 
+is provided. A callback function will have `this` pointing to that particular component instance.
+
+Trough subscription you can follow changes of state.
+
+Do note that instance of your state store implements `StoreInterface` defined as follows:
+
+````
+import {Observable, PartialObserver, Subscribable, Subscription} from "rxjs";
+
+export interface StoreInterface<T> extends Subscribable<T> {
+
+    /**
+     * Set state.
+     */
+    set(state: T): void;
+
+    /**
+     * Patch state.
+     */
+    patch(state: T): void;
+
+    /**
+     * Select slice of state.
+     */
+    select(selector: (state: T | null) => void): Observable<any>;
+
+    /**
+     * Get current state.
+     */
+    snapshot(): T | null;
+
+    /**
+     * Subscribe to state change.
+     */
+    subscribe(next?: PartialObserver<T> | ((value: T) => void)): Subscription;
+}
+    
+```` 
+
+**[WIP] This library is work in progress, tests and better documentation are required**
