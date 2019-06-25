@@ -184,4 +184,6 @@ export interface StoreInterface<T> extends Subscribable<T> {
     
 ```` 
 
+See demo on YouTube: [https://youtu.be/D07vAxlEUS0](https://youtu.be/D07vAxlEUS0). 
+
 **[WIP] This library is work in progress, tests and better documentation are required**
