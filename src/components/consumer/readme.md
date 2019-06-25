@@ -14,11 +14,9 @@
 
 ## Events
 
-| Event                                   | Description | Type               |
-| --------------------------------------- | ----------- | ------------------ |
-| `runopencode:store:consumer:register`   |             | `CustomEvent<any>` |
-| `runopencode:store:consumer:request`    |             | `CustomEvent<any>` |
-| `runopencode:store:consumer:unregister` |             | `CustomEvent<any>` |
+| Event                                | Description | Type               |
+| ------------------------------------ | ----------- | ------------------ |
+| `runopencode:store:consumer:request` |             | `CustomEvent<any>` |
 
 
 ## Dependencies

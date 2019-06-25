@@ -1,0 +1,220 @@
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+const __chunk_1 = require('./chunk-0aed596e.js');
+const __chunk_2 = require('./chunk-8835a7c7.js');
+
+var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+        r = Reflect.decorate(decorators, target, key, desc);
+    else
+        for (var i = decorators.length - 1; i >= 0; i--)
+            if (d = decorators[i])
+                r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (undefined && undefined.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
+        return Reflect.metadata(k, v);
+};
+class DemoConsumer {
+    constructor(hostRef) {
+        __chunk_1.registerInstance(this, hostRef);
+        this.prop = null;
+    }
+    injectStore(store) {
+        console.log('Store injected via method injection.', store);
+    }
+    onDefaultStoreProvided(store) {
+        console.log('After store is injected, instance method is invoked.', store);
+        this.store = store;
+        this.subscription = this.store.subscribe((state) => {
+            this.counter = state.counter;
+        });
+    }
+    disconnectedCallback() {
+        this.subscription.unsubscribe();
+    }
+    increase() {
+        let state = this.store.snapshot();
+        state.counter++;
+        this.store.patch(state);
+    }
+    render() {
+        return (__chunk_1.h("state-store-consumer", { consumer: this }, __chunk_1.h("div", null, "Current value rendered from consumer component: ", __chunk_1.h("span", null, this.counter)), __chunk_1.h("div", null, __chunk_1.h("button", { onClick: this.increase.bind(this) }, "Increase counter from consumer")), __chunk_1.h("slot", null)));
+    }
+}
+__decorate([
+    __chunk_2.Consume({
+        name: 'demo-store',
+        callback: 'onDefaultStoreProvided'
+    }),
+    __metadata("design:type", Object)
+], DemoConsumer.prototype, "store", void 0);
+__decorate([
+    __chunk_2.Consume({
+        name: 'demo-store',
+        callback: (store) => {
+            console.log('After store is injected, callback function is invoked.', store);
+        }
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], DemoConsumer.prototype, "injectStore", null);
+
+var __decorate$1 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+        r = Reflect.decorate(decorators, target, key, desc);
+    else
+        for (var i = decorators.length - 1; i >= 0; i--)
+            if (d = decorators[i])
+                r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata$1 = (undefined && undefined.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
+        return Reflect.metadata(k, v);
+};
+class DemoProvider {
+    constructor(hostRef) {
+        __chunk_1.registerInstance(this, hostRef);
+    }
+    connectedCallback() {
+        this.subscription = this.store.subscribe((state) => {
+            this.counter = state.counter;
+        });
+    }
+    disconnectedCallback() {
+        this.subscription.unsubscribe();
+    }
+    increase() {
+        let state = this.store.snapshot();
+        state.counter++;
+        this.store.patch(state);
+    }
+    render() {
+        return (__chunk_1.h("state-store-provider", { provider: this }, __chunk_1.h("div", null, "Current value rendered from provider component: ", __chunk_1.h("span", null, this.counter)), __chunk_1.h("div", null, __chunk_1.h("button", { onClick: this.increase.bind(this) }, "Increase counter from provider")), __chunk_1.h("slot", null)));
+    }
+}
+__decorate$1([
+    __chunk_2.Provide({
+        name: 'demo-store',
+        defaults: {
+            counter: 1
+        }
+    }),
+    __metadata$1("design:type", Object)
+], DemoProvider.prototype, "store", void 0);
+
+class Registry {
+    constructor() {
+        this._subject = new __chunk_2.Subject();
+        document.addEventListener('@runopencode:store:provider:register', this.onProviderRegistered.bind(this));
+    }
+    subscribe(next) {
+        return this._subject.subscribe(next);
+    }
+    onProviderRegistered() {
+        this._subject.next();
+    }
+    /**
+     * Singleton implementation
+     */
+    static getInstance() {
+        if (!Registry._instance) {
+            Registry._instance = new Registry();
+        }
+        return Registry._instance;
+    }
+}
+
+class Consumer {
+    constructor(hostRef) {
+        __chunk_1.registerInstance(this, hostRef);
+        this.requests = [];
+        this.subscription = null;
+        this.request = __chunk_1.createEvent(this, "runopencode:store:consumer:request", 7);
+    }
+    /**
+     * When provider is added to DOM, it should be registered in registry.
+     */
+    connectedCallback() {
+        this.requests = __chunk_2.getStoreRequests(this.consumer);
+        this.require();
+        if (0 === this.requests.length) {
+            return;
+        }
+        this.subscription = Registry.getInstance().subscribe(() => {
+            this.require();
+        });
+    }
+    /**
+     * When provider is removed from DOM, it should be unregistered from registry.
+     */
+    disconnectedCallback() {
+        if (this.subscription) {
+            this.subscription.unsubscribe();
+            this.subscription = null;
+        }
+        this.requests = [];
+    }
+    render() {
+        return (__chunk_1.h("slot", null));
+    }
+    require() {
+        let remove = [];
+        this.requests.forEach((request) => {
+            if (this.request.emit(request).defaultPrevented) {
+                remove.push(request);
+            }
+        });
+        remove.forEach((request) => {
+            this.requests.splice(this.requests.indexOf(request), 1);
+        });
+        if (0 === this.requests.length) {
+            this.subscription.unsubscribe();
+            this.subscription = null;
+        }
+    }
+}
+
+class Provider {
+    constructor(hostRef) {
+        __chunk_1.registerInstance(this, hostRef);
+        this.register = __chunk_1.createEvent(this, "@runopencode:store:provider:register", 7);
+    }
+    connectedCallback() {
+        this.stores = __chunk_2.getRegisteredStores(this.provider);
+        this.register.emit();
+    }
+    onRequest(event) {
+        let request = event.detail;
+        if (!this.stores.has(request.name)) {
+            return;
+        }
+        event.stopPropagation();
+        event.preventDefault();
+        let store = this.stores.get(request.name);
+        if (request.property) {
+            request.consumer[request.property] = store;
+        }
+        if (request.method) {
+            request.method.apply(request.consumer, [store]);
+        }
+        if (request.callback) {
+            request.callback.apply(request.consumer, [store]);
+        }
+    }
+    render() {
+        return (__chunk_1.h("slot", null));
+    }
+}
+
+exports.demo_consumer = DemoConsumer;
+exports.demo_provider = DemoProvider;
+exports.state_store_consumer = Consumer;
+exports.state_store_provider = Provider;

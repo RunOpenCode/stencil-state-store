@@ -1,0 +1,16 @@
+{
+  "entries": [
+    "components/demo/demo-consumer.js",
+    "components/consumer/consumer.js",
+    "components/demo/demo-provider.js",
+    "components/provider/provider.js"
+  ],
+  "compiler": {
+    "name": "@stencil/core",
+    "version": "1.0.7",
+    "typescriptVersion": "3.5.2"
+  },
+  "collections": [],
+  "bundles": [],
+  "global": "global/index.js"
+}
