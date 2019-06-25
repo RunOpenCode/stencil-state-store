@@ -1,9 +1,7 @@
 import {Component, Prop, h, EventEmitter, Event, Listen} from "@stencil/core";
-import {Registry}                                        from "../../utils/registry";
-import {RequestMetadata}                                 from "../../utils/request-metadata";
-import {StoreMetadata}                                   from "../../utils/store-metadata";
-
-Registry.create();
+import {getRegisteredStores}                             from "../../decorator/provide";
+import {StoreInterface}                                  from "../../store/store.interface";
+import {Request}                                         from "../../utils/request";
 
 @Component({
     tag:    'state-store-provider',
@@ -15,53 +13,47 @@ export class Provider {
     public provider!: any;
 
     @Event({
-        eventName: 'runopencode:store:provider:register',
-        bubbles:   true,
-        composed:  true,
+        eventName: '@runopencode:store:provider:register',
+        bubbles:   true
     })
-    public register: EventEmitter;
+    private register: EventEmitter;
 
-    @Event({
-        eventName: 'runopencode:store:provider:unregister',
-        bubbles:   true,
-        composed:  true,
-    })
-    public unregister: EventEmitter;
+    private stores: Map<string, StoreInterface<any>>;
 
-    private storeMetadata: StoreMetadata[];
-
-    /**
-     * When provider is added to DOM, it should be registered in registry.
-     */
     public connectedCallback(): void {
-        this.storeMetadata = StoreMetadata.parse(this);
-        this.register.emit(this);
+        this.stores = getRegisteredStores(this.provider);
+        this.register.emit();
     }
 
-    /**
-     * When provider is removed from DOM, it should be unregistered from registry.
-     */
-    public disconnectedCallback(): void {
-        this.unregister.emit(this);
+    @Listen('runopencode:store:consumer:request')
+    public onRequest(event: CustomEvent): void {
+        let request: Request = event.detail;
+
+        if (!this.stores.has(request.name)) {
+            return;
+        }
+
+        event.stopPropagation();
+        event.preventDefault();
+
+        let store: StoreInterface<any> = this.stores.get(request.name);
+
+        if (request.property) {
+            request.consumer[request.property] = store;
+        }
+
+        if (request.method) {
+            request.method.apply(request.consumer, [store]);
+        }
+
+        if (request.callback) {
+            request.callback.apply(request.consumer, [store]);
+        }
     }
 
     public render() {
         return (
             <slot/>
         )
-    }
-
-    @Listen('runopencode:store:consumer:request')
-    public onRequest(event: CustomEvent): void {
-        let request: RequestMetadata = event.detail;
-
-        this.storeMetadata.forEach((metadata: StoreMetadata) => {
-
-            if (metadata.store !== request.store) {
-                return;
-            }
-
-            request.requestedBy.provide(request, metadata.provider[metadata.property]);
-        });
     }
 }

@@ -62,13 +62,10 @@ declare namespace LocalJSX {
   interface DemoProvider extends JSXBase.HTMLAttributes<HTMLDemoProviderElement> {}
   interface StateStoreConsumer extends JSXBase.HTMLAttributes<HTMLStateStoreConsumerElement> {
     'consumer': any;
-    'onRunopencode:store:consumer:register'?: (event: CustomEvent<any>) => void;
     'onRunopencode:store:consumer:request'?: (event: CustomEvent<any>) => void;
-    'onRunopencode:store:consumer:unregister'?: (event: CustomEvent<any>) => void;
   }
   interface StateStoreProvider extends JSXBase.HTMLAttributes<HTMLStateStoreProviderElement> {
-    'onRunopencode:store:provider:register'?: (event: CustomEvent<any>) => void;
-    'onRunopencode:store:provider:unregister'?: (event: CustomEvent<any>) => void;
+    'on@runopencode:store:provider:register'?: (event: CustomEvent<any>) => void;
     'provider': any;
   }
 

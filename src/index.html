@@ -1,25 +1,41 @@
 <!DOCTYPE html>
 <html dir="ltr" lang="en">
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
-      <title>Stencil Component Starter</title>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
+    <title>Stencil Component Starter</title>
 
-      <script type="module" src="/build/stencil-state-store.esm.js"></script>
-      <script nomodule src="/build/stencil-state-store.js"></script>
+    <script type="module" src="/build/stencil-state-store.esm.js"></script>
+    <script nomodule src="/build/stencil-state-store.js"></script>
 
-    </head>
-    <body>
+</head>
+<body>
 
-        <div>
-            <demo-provider>
+<div>
+    <h1>
+        This is first component composition
+    </h1>
+    <demo-provider>
 
-                <demo-consumer>
-                    Test
-                </demo-consumer>
+        <demo-consumer>
 
-            </demo-provider>
-        </div>
+        </demo-consumer>
 
-    </body>
+    </demo-provider>
+</div>
+
+<div>
+    <h1>
+        This is second component composition
+    </h1>
+    <demo-provider>
+
+        <demo-consumer>
+
+        </demo-consumer>
+
+    </demo-provider>
+</div>
+
+</body>
 </html>

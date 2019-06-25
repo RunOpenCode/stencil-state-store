@@ -1,4 +1,3 @@
-export class State {
-
-    public c
+export interface State {
+    counter: number;
 }

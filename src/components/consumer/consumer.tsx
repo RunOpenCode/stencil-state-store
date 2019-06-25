@@ -1,9 +1,8 @@
 import {Component, Prop, EventEmitter, Event, h} from "@stencil/core";
-import {RequestMetadata}                         from "../../utils/request-metadata";
+import {Subscription}                            from "rxjs";
+import {getStoreRequests}                        from "../../decorator/consume";
 import {Registry}                                from "../../utils/registry";
-import {Store}                                   from "../../utils/store";
-
-Registry.create();
+import {Request}                                 from "../../utils/request";
 
 @Component({
     tag:    'state-store-consumer',
@@ -15,41 +14,44 @@ export class Consumer {
     public consumer!: any;
 
     @Event({
-        eventName: 'runopencode:store:consumer:register',
-        bubbles:   true,
-        composed:  true,
-    })
-    public register: EventEmitter;
-
-    @Event({
-        eventName: 'runopencode:store:consumer:unregister',
-        bubbles:   true,
-        composed:  true,
-    })
-    public unregister: EventEmitter;
-
-    @Event({
-        eventName: 'runopencode:store:consumer:request',
-        bubbles:   true,
-        composed:  true,
+        eventName:  'runopencode:store:consumer:request',
+        bubbles:    true,
+        composed:   true,
+        cancelable: true,
     })
     public request: EventEmitter;
 
-    private requests: RequestMetadata[];
+    private requests: Request[] = [];
+
+    private subscription: Subscription = null;
 
     /**
      * When provider is added to DOM, it should be registered in registry.
      */
     public connectedCallback(): void {
-        this.requests = RequestMetadata.parse(this);
-        this.register.emit(this);
+        this.requests = getStoreRequests(this.consumer);
+        this.require();
+
+        if (0 === this.requests.length) {
+            return;
+        }
+
+        this.subscription = Registry.getInstance().subscribe(() => {
+            this.require();
+        });
     }
 
     /**
      * When provider is removed from DOM, it should be unregistered from registry.
      */
     public disconnectedCallback(): void {
-        this.unregister.emit(this);
+
+        if (this.subscription) {
+            this.subscription.unsubscribe();
+            this.subscription = null;
+        }
+
+        this.requests = [];
     }
 
     public render() {
@@ -58,18 +60,24 @@ export class Consumer {
         )
     }
 
-    public requestStateStores(): void {
+    private require(): void {
 
-        this.requests.forEach((request: RequestMetadata) => {
-            this.request.emit(request);
+        let remove: Request[] = [];
+
+        this.requests.forEach((request: Request) => {
+
+            if (this.request.emit(request).defaultPrevented) {
+                remove.push(request);
+            }
         });
-    }
 
-    public provide(request: RequestMetadata, store: Store<any>): void {
-        request.consumer[request.property] = store;
+        remove.forEach((request: Request) => {
+            this.requests.splice( this.requests.indexOf(request), 1);
+        });
 
-        if (request.callback) {
-            request.callback();
+        if (0 === this.requests.length) {
+            this.subscription.unsubscribe();
+            this.subscription = null;
         }
     }
 }

@@ -1,7 +1,8 @@
-import {BehaviorSubject, Subscribable, Subscription, PartialObserver, Observable} from "rxjs";
-import {map}                                                                      from "rxjs/operators";
+import {BehaviorSubject, Subscription, PartialObserver, Observable} from "rxjs";
+import {map}                                                        from "rxjs/operators";
+import {StoreInterface}                                             from "./store.interface";
 
-export class Store<T> implements Subscribable<T> {
+export class Store<T> implements StoreInterface<T> {
 
     /**
      * Current state.
@@ -39,7 +40,7 @@ export class Store<T> implements Subscribable<T> {
     }
 
     /**
-     * Select a slide of data from store.
+     * Select a slice of data from store.
      */
     public select(selector: (state: T | null) => void): Observable<any> {
         return this._subject.pipe(
