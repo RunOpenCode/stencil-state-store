@@ -17,7 +17,7 @@ export declare class Store<T> implements StoreInterface<T> {
     /**
      * Patch current state.
      */
-    patch(state: T): void;
+    patch(state: Partial<T>): void;
     /**
      * Select a slice of data from store.
      */

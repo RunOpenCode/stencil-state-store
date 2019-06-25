@@ -30,11 +30,11 @@ export class Store<T> implements StoreInterface<T> {
     /**
      * Patch current state.
      */
-    public patch(state: T): void {
+    public patch(state: Partial<T>): void {
         this._snapshot = {
             ...(this._snapshot || {}),
             ...state
-        };
+        } as T;
 
         this._subject.next(this._snapshot);
     }

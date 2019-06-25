@@ -1,8 +1,8 @@
 {
   "entries": [
-    "components/demo/demo-consumer.js",
-    "components/consumer/consumer.js",
     "components/demo/demo-provider.js",
+    "components/consumer/consumer.js",
+    "components/demo/demo-consumer.js",
     "components/provider/provider.js"
   ],
   "compiler": {

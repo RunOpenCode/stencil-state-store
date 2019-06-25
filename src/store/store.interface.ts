@@ -10,7 +10,7 @@ export interface StoreInterface<T> extends Subscribable<T> {
     /**
      * Patch state.
      */
-    patch(state: T): void;
+    patch(state: Partial<T>): void;
 
     /**
      * Select slice of state.
