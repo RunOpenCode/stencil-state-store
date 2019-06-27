@@ -1,5 +1,8 @@
 import { Store } from "../store/store";
 const storesRegistryKey = Symbol('@runopencode:state:provide:registry');
+/**
+ * Provide decorator, denotes state store that is available for consumption.
+ */
 export function Provide(options) {
     return function decoratorFactory(target, propertyKey) {
         options = Object.assign({ defaults: null }, (options));
@@ -24,6 +27,9 @@ export function Provide(options) {
         Reflect.defineMetadata(storesRegistryKey, registeredStores, target);
     };
 }
+/**
+ * Get all state stores provided by component instance.
+ */
 export function getRegisteredStores(instance) {
     let registry = Reflect.getMetadata(storesRegistryKey, instance);
     let result = new Map();

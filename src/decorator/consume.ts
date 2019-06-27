@@ -3,9 +3,27 @@ import {Request}        from "../utils/request";
 
 const metadataRegistryKey = Symbol('@runopencode:state:consume:requests');
 
+/**
+ * Consume decorator options.
+ */
+export interface ConsumeOptions {
+    /**
+     * Name of the required store
+     */
+    name: string;
+
+    /**
+     * Function which has to be invoked after store is provide
+     */
+    callback?: ((store: StoreInterface<any>) => void) | string | null;
+}
+
+/**
+ * Consume decorator, denotes state store which has to be provided to property/method.
+ */
 export function Consume(options: ConsumeOptions): any {
 
-    return function (target: Object, propertyKey: string, propertyDescriptior: PropertyDescriptor) {
+    return function decoratorFactory(target: Object, propertyKey: string, propertyDescriptior: PropertyDescriptor) {
 
         options                  = {
             ...{callback: null},
@@ -24,11 +42,9 @@ export function Consume(options: ConsumeOptions): any {
     }
 }
 
-export interface ConsumeOptions {
-    name: string;
-    callback?: ((store: StoreInterface<any>) => void) | string | null;
-}
-
+/**
+ * Get all requests for state stores by given component instance.
+ */
 export function getStoreRequests(instance: any): Request[] {
     let requests: Request[]           = [];
     let metadata: Metadata[]          = Reflect.getMetadata(metadataRegistryKey, instance);
@@ -54,14 +70,29 @@ export function getStoreRequests(instance: any): Request[] {
     return requests;
 }
 
+/**
+ * Request metadata provided via decorator.
+ */
 class Metadata {
 
+    /**
+     * Name of requested store.
+     */
     private readonly _name: string;
 
+    /**
+     * Name of property/method for which decorator is attached.
+     */
     private readonly _property: string;
 
+    /**
+     * Callback function that needs to be invoked (if any) when store is provided.
+     */
     private readonly _callback: ((store: StoreInterface<any>) => void) | string | null;
 
+    /**
+     * Denotes if decorator decorates property or method.
+     */
     private readonly _type: 'property' | 'method';
 
     constructor(name: string, property: string, callback: ((store: StoreInterface<any>) => void) | string | null, type: 'property' | 'method') {
@@ -70,7 +101,6 @@ class Metadata {
         this._callback = callback;
         this._type     = type;
     }
-
 
     public get name(): string {
         return this._name;

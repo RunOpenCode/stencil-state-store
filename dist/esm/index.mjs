@@ -1,1 +1,1 @@
-export { C as Consume, P as Provide } from './chunk-03875da1.js';
+export { C as Consume, P as Provide } from './chunk-89892b30.js';

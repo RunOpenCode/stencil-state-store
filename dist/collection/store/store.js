@@ -1,38 +1,53 @@
 import { BehaviorSubject } from "rxjs";
 import { map } from "rxjs/operators";
+/**
+ * Default store implementation
+ */
 export class Store {
     constructor(state = null) {
         this._snapshot = state;
         this._subject = new BehaviorSubject(state);
     }
     /**
-     * Set current state.
+     * @inheritdoc
+     */
+    get observer() {
+        return this._subject.asObservable();
+    }
+    /**
+     * @inheritDoc
+     */
+    select(selector) {
+        return this._subject.pipe(map(selector));
+    }
+    /**
+     * @inheritDoc
+     */
+    snapshot() {
+        return this._snapshot;
+    }
+    /**
+     * @inheritDoc
      */
     set(state) {
         this._snapshot = state;
         this._subject.next(state);
     }
     /**
-     * Patch current state.
+     * @inheritDoc
      */
     patch(state) {
         this._snapshot = Object.assign({}, (this._snapshot || {}), state);
         this._subject.next(this._snapshot);
     }
     /**
-     * Select a slice of data from store.
+     * @inheritDoc
      */
-    select(selector) {
-        return this._subject.pipe(map(selector));
+    error(err) {
+        this._subject.error(err);
     }
     /**
-     * Get current state.
-     */
-    snapshot() {
-        return this._snapshot;
-    }
-    /**
-     * Subscribe to state.
+     * @inheritDoc
      */
     subscribe(next) {
         return this._subject.subscribe(next);

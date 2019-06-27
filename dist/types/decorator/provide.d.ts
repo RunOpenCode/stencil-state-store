@@ -1,9 +1,24 @@
 import { StoreInterface } from "../store/store.interface";
-export declare function Provide(options: ProvideOptions): (target: any, propertyKey: string) => void;
-export declare function getRegisteredStores(instance: any): Map<string, StoreInterface<any>>;
+/**
+ * Provide decorator options.
+ */
 export interface ProvideOptions {
+    /**
+     * Name of provided store.
+     */
     name: string;
+    /**
+     * Inital store values.
+     */
     defaults: {
         [key: string]: any;
-    };
+    } | null;
 }
+/**
+ * Provide decorator, denotes state store that is available for consumption.
+ */
+export declare function Provide(options: ProvideOptions): (target: any, propertyKey: string) => void;
+/**
+ * Get all state stores provided by component instance.
+ */
+export declare function getRegisteredStores(instance: any): Map<string, StoreInterface<any>>;

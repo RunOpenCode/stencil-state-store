@@ -1,7 +1,7 @@
 import {StoreInterface} from "../store/store.interface";
 
 /**
- * Request for store emitted by consumer.
+ * Request for state store emitted by consumer.
  */
 export class Request {
 
@@ -21,12 +21,12 @@ export class Request {
     private readonly _property: string | null;
 
     /**
-     * Callback which will be invoked after store is provided.
+     * Method which will accept store.
      */
     private readonly _method: ((store?: StoreInterface<any>) => void) | null;
 
     /**
-     * If store can be provided, callback will be invoked.
+     * Callback which will be invoked after store is provided.
      */
     private readonly _callback: ((store?: StoreInterface<any>) => void) | null;
 

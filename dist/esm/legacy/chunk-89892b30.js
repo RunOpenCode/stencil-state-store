@@ -12,7 +12,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 /**
- * Request for store emitted by consumer.
+ * Request for state store emitted by consumer.
  */
 var Request = /** @class */ (function () {
     function Request(name, consumer, property, method, callback) {
@@ -60,8 +60,11 @@ var Request = /** @class */ (function () {
     return Request;
 }());
 var metadataRegistryKey = Symbol('@runopencode:state:consume:requests');
+/**
+ * Consume decorator, denotes state store which has to be provided to property/method.
+ */
 function Consume(options) {
-    return function (target, propertyKey, propertyDescriptior) {
+    return function decoratorFactory(target, propertyKey, propertyDescriptior) {
         options = Object.assign({ callback: null }, (options));
         var metadata = Reflect.getMetadata(metadataRegistryKey, target) || [];
         var descriptor = new Metadata(options.name, propertyKey, options.callback, propertyDescriptior ? 'method' : 'property');
@@ -69,6 +72,9 @@ function Consume(options) {
         Reflect.defineMetadata(metadataRegistryKey, metadata, target);
     };
 }
+/**
+ * Get all requests for state stores by given component instance.
+ */
 function getStoreRequests(instance) {
     var requests = [];
     var metadata = Reflect.getMetadata(metadataRegistryKey, instance);
@@ -82,6 +88,9 @@ function getStoreRequests(instance) {
     });
     return requests;
 }
+/**
+ * Request metadata provided via decorator.
+ */
 var Metadata = /** @class */ (function () {
     function Metadata(name, property, callback, type) {
         this._name = name;
@@ -931,40 +940,59 @@ var MapSubscriber = /** @class */ (function (_super) {
     };
     return MapSubscriber;
 }(Subscriber));
+/**
+ * Default store implementation
+ */
 var Store = /** @class */ (function () {
     function Store(state) {
         if (state === void 0) { state = null; }
         this._snapshot = state;
         this._subject = new BehaviorSubject(state);
     }
+    Object.defineProperty(Store.prototype, "observer", {
+        /**
+         * @inheritdoc
+         */
+        get: function () {
+            return this._subject.asObservable();
+        },
+        enumerable: true,
+        configurable: true
+    });
     /**
-     * Set current state.
+     * @inheritDoc
+     */
+    Store.prototype.select = function (selector) {
+        return this._subject.pipe(map(selector));
+    };
+    /**
+     * @inheritDoc
+     */
+    Store.prototype.snapshot = function () {
+        return this._snapshot;
+    };
+    /**
+     * @inheritDoc
      */
     Store.prototype.set = function (state) {
         this._snapshot = state;
         this._subject.next(state);
     };
     /**
-     * Patch current state.
+     * @inheritDoc
      */
     Store.prototype.patch = function (state) {
         this._snapshot = Object.assign({}, (this._snapshot || {}), state);
         this._subject.next(this._snapshot);
     };
     /**
-     * Select a slice of data from store.
+     * @inheritDoc
      */
-    Store.prototype.select = function (selector) {
-        return this._subject.pipe(map(selector));
+    Store.prototype.error = function (err) {
+        this._subject.error(err);
     };
     /**
-     * Get current state.
-     */
-    Store.prototype.snapshot = function () {
-        return this._snapshot;
-    };
-    /**
-     * Subscribe to state.
+     * @inheritDoc
      */
     Store.prototype.subscribe = function (next) {
         return this._subject.subscribe(next);
@@ -972,6 +1000,9 @@ var Store = /** @class */ (function () {
     return Store;
 }());
 var storesRegistryKey = Symbol('@runopencode:state:provide:registry');
+/**
+ * Provide decorator, denotes state store that is available for consumption.
+ */
 function Provide(options) {
     return function decoratorFactory(target, propertyKey) {
         options = Object.assign({ defaults: null }, (options));
@@ -996,6 +1027,9 @@ function Provide(options) {
         Reflect.defineMetadata(storesRegistryKey, registeredStores, target);
     };
 }
+/**
+ * Get all state stores provided by component instance.
+ */
 function getRegisteredStores(instance) {
     var registry = Reflect.getMetadata(storesRegistryKey, instance);
     var result = new Map();

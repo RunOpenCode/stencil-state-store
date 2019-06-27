@@ -1,7 +1,7 @@
 {
     "name": "@runopencode/stencil-state-store",
-    "version": "0.0.2",
-    "description": "Light state store management for Stenciljs",
+    "version": "0.0.3",
+    "description": "Light state store management for Stencil",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
     "es2015": "dist/esm/index.mjs",
@@ -15,7 +15,7 @@
         "loader/"
     ],
     "scripts": {
-        "build": "stencil build --docs",
+        "build": "stencil build",
         "start": "stencil build --dev --watch --serve",
         "test": "stencil test --spec --e2e",
         "test.watch": "stencil test --spec --e2e --watchAll"

@@ -1,5 +1,8 @@
 import { Subscription, PartialObserver, Observable } from "rxjs";
 import { StoreInterface } from "./store.interface";
+/**
+ * Default store implementation
+ */
 export declare class Store<T> implements StoreInterface<T> {
     /**
      * Current state.
@@ -11,23 +14,31 @@ export declare class Store<T> implements StoreInterface<T> {
     private _subject;
     constructor(state?: T);
     /**
-     * Set current state.
+     * @inheritdoc
      */
-    set(state: T): void;
+    readonly observer: Observable<T>;
     /**
-     * Patch current state.
-     */
-    patch(state: Partial<T>): void;
-    /**
-     * Select a slice of data from store.
+     * @inheritDoc
      */
     select(selector: (state: T | null) => void): Observable<any>;
     /**
-     * Get current state.
+     * @inheritDoc
      */
     snapshot(): T | null;
     /**
-     * Subscribe to state.
+     * @inheritDoc
+     */
+    set(state: T): void;
+    /**
+     * @inheritDoc
+     */
+    patch(state: Partial<T>): void;
+    /**
+     * @inheritDoc
+     */
+    error(err: any): void;
+    /**
+     * @inheritDoc
      */
     subscribe(next?: PartialObserver<T> | ((value: T) => void)): Subscription;
 }

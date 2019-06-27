@@ -1,7 +1,10 @@
 import { Request } from "../utils/request";
 const metadataRegistryKey = Symbol('@runopencode:state:consume:requests');
+/**
+ * Consume decorator, denotes state store which has to be provided to property/method.
+ */
 export function Consume(options) {
-    return function (target, propertyKey, propertyDescriptior) {
+    return function decoratorFactory(target, propertyKey, propertyDescriptior) {
         options = Object.assign({ callback: null }, (options));
         let metadata = Reflect.getMetadata(metadataRegistryKey, target) || [];
         let descriptor = new Metadata(options.name, propertyKey, options.callback, propertyDescriptior ? 'method' : 'property');
@@ -9,6 +12,9 @@ export function Consume(options) {
         Reflect.defineMetadata(metadataRegistryKey, metadata, target);
     };
 }
+/**
+ * Get all requests for state stores by given component instance.
+ */
 export function getStoreRequests(instance) {
     let requests = [];
     let metadata = Reflect.getMetadata(metadataRegistryKey, instance);
@@ -22,6 +28,9 @@ export function getStoreRequests(instance) {
     });
     return requests;
 }
+/**
+ * Request metadata provided via decorator.
+ */
 class Metadata {
     constructor(name, property, callback, type) {
         this._name = name;

@@ -1,13 +1,26 @@
 import { Subject } from "rxjs";
+/**
+ * Registry deals with the issue of nondeterministic order
+ * of rendering each individual component, regardless
+ * of hierarchical position in DOM tree (parent, child).
+ */
 export class Registry {
     constructor() {
+        /**
+         * Observable subject which notifies about new provider.
+         */
         this._subject = new Subject();
-        document.addEventListener('@runopencode:store:provider:register', this.onProviderRegistered.bind(this));
     }
+    /**
+     * Subscribe for provider registration event.
+     */
     subscribe(next) {
         return this._subject.subscribe(next);
     }
-    onProviderRegistered() {
+    /**
+     * Notify subscribers that new provider has been attached to DOM
+     */
+    notify() {
         this._subject.next();
     }
     /**

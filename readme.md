@@ -8,6 +8,17 @@ that share and update common state.
 Although there are other approaches, like property probing, or state tunneling, this approach is inspired
 by [NGXS](https://ngxs.gitbook.io) and based on [RXJS](https://rxjs-dev.firebaseapp.com/).
 
+While NGXS have concept of actions which is dispatched and accepted by store, in this simplified
+version, components have direct access to store and can invoke `patch` and `set` methods to mutate
+state.
+
+Rationale behind this is that web components should be simple and communication lightweight. 
+If something like NGXS is required to manage components communication, you should
+to reconsider using some application framework and/or more complex library for state management. 
+
+Web components should be used for building web components. For complex use case scenarios, perhaps
+application frameworks are more suitable.
+
 ## Learn by example
 
 Let's say that we have some state that needs to be shared among components:
@@ -42,9 +53,9 @@ provide for them a shared state store, that is, an instance of `StoreInterface` 
 instance of `CarouselState`.
 
 ````
-import {Component, h}               from "@stencil/core";
-import {Provide, StoreInterface}    from "@runopencode/stencil-state-store";
-import {CarouselState}              from "./state";
+import {Component, h}      from "@stencil/core";
+import {Provide, Store}    from "@runopencode/stencil-state-store";
+import {CarouselState}     from "./state";
 
 @Component({
     tag:    'runopencode-carousel',
@@ -53,16 +64,18 @@ import {CarouselState}              from "./state";
 export class Carousel {
     
         @Provide({
-            name:     'runopencode-carousel',
+            name:     'runopencode-carousel-store',
             defaults: {
                 page: 1
             }
         })
-        public store: StoreInterface<CarouselState>;
+        public store: Store<CarouselState>;
         
         public render() {
             return (
-                <slot/>
+                <state-store-provider provider={this}>               
+                    <slot/>
+                </state-store-provider>
             );
         }
 }
@@ -71,10 +84,10 @@ export class Carousel {
 Component `runopencode-carousel-pager` can consume that state store:
 
 ````
-import {Component, h}               from "@stencil/core";
-import {Provide, StoreInterface}    from "@runopencode/stencil-state-store";
-import {CarouselState}              from "./state";
-import {Unsubscribable}             from "rxjs";
+import {Component, h}      from "@stencil/core";
+import {Provide, Store}    from "@runopencode/stencil-state-store";
+import {CarouselState}     from "./state";
+import {Unsubscribable}    from "rxjs";
 
 @Component({
     tag:    'runopencode-carousel-pager',
@@ -88,9 +101,9 @@ export class CarouselPager {
     private subscription: Unsubscribable;
     
     @Consume({
-        name: 'demo-store'
+        name: 'runopencode-carousel-store'
     })
-    public consume(store: StoreInterface<CarouselState>): void {
+    public consume(store: Store<CarouselState>): void {
         this.subscription = this.store.subscribe((state: CarouselState) => {
             this.page = state.page;
         });
@@ -102,9 +115,11 @@ export class CarouselPager {
     
     public render() {
         return (
-            <div>
-                Current slide is {this.page}
-            </div>
+            <state-store-consumer consumer={this}>
+                <div>
+                    Current slide is {this.page}
+                </div>
+            </state-store-consumer>
         );
     }
 }
@@ -115,46 +130,105 @@ So, there is one few classes, decorators and interfaces involved here.
 1. You need to define your state interface. It is simple key, value pair, defined by following:
 
 ````
-interface MyState {
-    [key: string]: any
-}
+export interface CarouselState {
+    page: number;
+} 
 ````
 
 2. You have to provide your state store, with default values and unique name from parent component:
 
 ````
-
 @Provide({
-    name:     'runopencode-carousel',
-    defaults: [DEFAULT VALUE FOR YOUR STATE]
+    name:     'runopencode-carousel-store',
+    defaults: {
+        page: 1
+    }
 })
-public store: StoreInterface<MyState>;
+public store: Store<CarouselState>;
 
 ````
+
+That component must use `state-store-provider` component, wrapping child components within slot(s),
+with `provider` property referencing to `this` when rendering component.
+
+````
+public render() {
+    return (
+        <state-store-provider provider={this}>               
+            <slot/>
+        </state-store-provider>
+    );
+}
+```` 
+
 3. You have to consume your state
 
 ````
 @Consume({
-    name:     'runopencode-carousel',
-    callback:  (store: StoreInterface<MyState>) => {
-        store.subscribe(...)
-    }
+    name: 'runopencode-carousel-store'
 })
-public store: StoreInterface<ComponentState>;
+public consume(store: Store<CarouselState>): void {
+    this.subscription = this.store.subscribe((state: CarouselState) => {
+        this.page = state.page;
+    });
+}
 ````
 
 Note that you can consume store trough component property, as well as trough component method. 
 If you are using a property for consumption, you can define a callback to invoke when store 
 is provided. A callback function will have `this` pointing to that particular component instance.
 
+Example:
+````
+@Consume({
+    name: 'runopencode-carousel-store',   
+    callback: function() {
+        this.subscription = this.store.subscribe((state: CarouselState) => {
+            this.page = state.page;
+        });
+    }
+})
+public consume: Store<CarouselState>;
+````
+
+Consuming component must use `state-store-consumer` component, with `consumer` property 
+referencing to `this` when rendering component.
+
+````
+public render() {
+    return (
+        <div>
+            <state-store-consumer consumer={this}>               
+        </div>        
+    );
+}
+````
+
 Trough subscription you can follow changes of state.
 
-Do note that instance of your state store implements `StoreInterface` defined as follows:
+## State store implementation. 
+
+Do note that instance of your state store implements `Store` interface defined as follows:
 
 ````
 import {Observable, PartialObserver, Subscribable, Subscription} from "rxjs";
 
-export interface StoreInterface<T> extends Subscribable<T> {
+export interface Store<T> extends Subscribable<T> {
+
+    /**
+     * Get observable.
+     */
+    observer: Observable<T>;
+
+    /**
+     * Select slice of state.
+     */
+    select(selector: (state: T | null) => void): Observable<T>;
+
+    /**
+     * Get current state.
+     */
+    snapshot(): T | null;
 
     /**
      * Set state.
@@ -164,17 +238,12 @@ export interface StoreInterface<T> extends Subscribable<T> {
     /**
      * Patch state.
      */
-    patch(state: T): void;
+    patch(state: Partial<T>): void;
 
     /**
-     * Select slice of state.
+     * Notify observers about error.
      */
-    select(selector: (state: T | null) => void): Observable<any>;
-
-    /**
-     * Get current state.
-     */
-    snapshot(): T | null;
+    error(err: any): void;
 
     /**
      * Subscribe to state change.
@@ -186,4 +255,4 @@ export interface StoreInterface<T> extends Subscribable<T> {
 
 See demo on YouTube: [https://youtu.be/D07vAxlEUS0](https://youtu.be/D07vAxlEUS0). 
 
-**[WIP] This library is work in progress, tests and better documentation are required**
+**[WIP] This library is work in progress, tests are required**

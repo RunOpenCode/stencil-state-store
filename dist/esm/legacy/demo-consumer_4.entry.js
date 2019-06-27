@@ -1,5 +1,5 @@
-import { r as registerInstance, h, c as createEvent } from './chunk-57ec6783.js';
-import { C as Consume, P as Provide, S as Subject, g as getStoreRequests, a as getRegisteredStores } from './chunk-03875da1.js';
+import { r as registerInstance, h, H as Host, c as createEvent } from './chunk-b79728d4.js';
+import { C as Consume, P as Provide, S as Subject, g as getStoreRequests, a as getRegisteredStores } from './chunk-89892b30.js';
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
@@ -39,7 +39,7 @@ var DemoConsumer = /** @class */ (function () {
         this.store.patch(state);
     };
     DemoConsumer.prototype.render = function () {
-        return (h("state-store-consumer", { consumer: this }, h("div", null, "Current value rendered from consumer component: ", h("span", null, this.counter)), h("div", null, h("button", { onClick: this.increase.bind(this) }, "Increase counter from consumer")), h("slot", null)));
+        return (h(Host, null, h("state-store-consumer", { consumer: this }), h("div", null, "Current value rendered from consumer component: ", h("span", null, this.counter)), h("div", null, h("button", { onClick: this.increase.bind(this) }, "Increase counter from consumer"))));
     };
     return DemoConsumer;
 }());
@@ -107,15 +107,28 @@ __decorate$1([
     }),
     __metadata$1("design:type", Object)
 ], DemoProvider.prototype, "store", void 0);
+/**
+ * Registry deals with the issue of nondeterministic order
+ * of rendering each individual component, regardless
+ * of hierarchical position in DOM tree (parent, child).
+ */
 var Registry = /** @class */ (function () {
     function Registry() {
+        /**
+         * Observable subject which notifies about new provider.
+         */
         this._subject = new Subject();
-        document.addEventListener('@runopencode:store:provider:register', this.onProviderRegistered.bind(this));
     }
+    /**
+     * Subscribe for provider registration event.
+     */
     Registry.prototype.subscribe = function (next) {
         return this._subject.subscribe(next);
     };
-    Registry.prototype.onProviderRegistered = function () {
+    /**
+     * Notify subscribers that new provider has been attached to DOM
+     */
+    Registry.prototype.notify = function () {
         this._subject.next();
     };
     /**
@@ -132,12 +145,21 @@ var Registry = /** @class */ (function () {
 var Consumer = /** @class */ (function () {
     function Consumer(hostRef) {
         registerInstance(this, hostRef);
+        /**
+         * List of all requested stores.
+         */
         this.requests = [];
+        /**
+         * Subscription to provider Registry.
+         */
         this.subscription = null;
         this.request = createEvent(this, "runopencode:store:consumer:request", 7);
     }
     /**
-     * When provider is added to DOM, it should be registered in registry.
+     * When consumer is added to DOM, stores are required from provider(s).
+     *
+     * If there are no requested stores available, subscribe to a registry and
+     * wait until provider is available.
      */
     Consumer.prototype.connectedCallback = function () {
         var _this = this;
@@ -151,7 +173,8 @@ var Consumer = /** @class */ (function () {
         });
     };
     /**
-     * When provider is removed from DOM, it should be unregistered from registry.
+     * When consumer is removed from DOM, unsubscribe from the registry
+     * and clear any remaining store requests from list.
      */
     Consumer.prototype.disconnectedCallback = function () {
         if (this.subscription) {
@@ -163,18 +186,30 @@ var Consumer = /** @class */ (function () {
     Consumer.prototype.render = function () {
         return (h("slot", null));
     };
+    /**
+     * For each request for store from the list,
+     * fire request event which will bubble up to the provider,
+     * if provider is available.
+     */
     Consumer.prototype.require = function () {
         var _this = this;
+        // list of satisfied requests
         var remove = [];
         this.requests.forEach(function (request) {
+            // if default is prevented for the event
+            // that means that request for store is satisfied
+            // and it should be removed from the list
             if (_this.request.emit(request).defaultPrevented) {
                 remove.push(request);
             }
         });
+        // remove all satisfied requests
         remove.forEach(function (request) {
             _this.requests.splice(_this.requests.indexOf(request), 1);
         });
-        if (0 === this.requests.length) {
+        // if list of store requests is empty and there is subscription to
+        // registry, do unsubscribe.
+        if (0 === this.requests.length && null !== this.subscription) {
             this.subscription.unsubscribe();
             this.subscription = null;
         }
@@ -184,12 +219,19 @@ var Consumer = /** @class */ (function () {
 var Provider = /** @class */ (function () {
     function Provider(hostRef) {
         registerInstance(this, hostRef);
-        this.register = createEvent(this, "@runopencode:store:provider:register", 7);
     }
+    /**
+     * Get list of registered stores from provider
+     * and notify registry that provider is ready for
+     * requests.
+     */
     Provider.prototype.connectedCallback = function () {
         this.stores = getRegisteredStores(this.provider);
-        this.register.emit();
+        Registry.getInstance().notify();
     };
+    /**
+     * Listen for store requests.
+     */
     Provider.prototype.onRequest = function (event) {
         var request = event.detail;
         if (!this.stores.has(request.name)) {

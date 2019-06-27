@@ -10,9 +10,15 @@ import {Request}                                 from "../../utils/request";
 })
 export class Consumer {
 
+    /**
+     * Consuming component.
+     */
     @Prop()
     public consumer!: any;
 
+    /**
+     * Request for store event.
+     */
     @Event({
         eventName:  'runopencode:store:consumer:request',
         bubbles:    true,
@@ -21,12 +27,21 @@ export class Consumer {
     })
     public request: EventEmitter;
 
+    /**
+     * List of all requested stores.
+     */
     private requests: Request[] = [];
 
+    /**
+     * Subscription to provider Registry.
+     */
     private subscription: Subscription = null;
 
     /**
-     * When provider is added to DOM, it should be registered in registry.
+     * When consumer is added to DOM, stores are required from provider(s).
+     *
+     * If there are no requested stores available, subscribe to a registry and
+     * wait until provider is available.
      */
     public connectedCallback(): void {
         this.requests = getStoreRequests(this.consumer);
@@ -42,7 +57,8 @@ export class Consumer {
     }
 
     /**
-     * When provider is removed from DOM, it should be unregistered from registry.
+     * When consumer is removed from DOM, unsubscribe from the registry
+     * and clear any remaining store requests from list.
      */
     public disconnectedCallback(): void {
 
@@ -60,22 +76,34 @@ export class Consumer {
         )
     }
 
+    /**
+     * For each request for store from the list,
+     * fire request event which will bubble up to the provider,
+     * if provider is available.
+     */
     private require(): void {
 
+        // list of satisfied requests
         let remove: Request[] = [];
 
         this.requests.forEach((request: Request) => {
 
+            // if default is prevented for the event
+            // that means that request for store is satisfied
+            // and it should be removed from the list
             if (this.request.emit(request).defaultPrevented) {
                 remove.push(request);
             }
         });
 
+        // remove all satisfied requests
         remove.forEach((request: Request) => {
             this.requests.splice( this.requests.indexOf(request), 1);
         });
 
-        if (0 === this.requests.length) {
+        // if list of store requests is empty and there is subscription to
+        // registry, do unsubscribe.
+        if (0 === this.requests.length && null !== this.subscription) {
             this.subscription.unsubscribe();
             this.subscription = null;
         }

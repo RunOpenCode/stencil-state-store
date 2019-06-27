@@ -1,7 +1,7 @@
 import {Component, h, State}     from "@stencil/core";
 import {Unsubscribable}          from "rxjs";
 import {Provide}                 from "../../decorator/provide";
-import {StoreInterface}          from "../../store/store.interface";
+import {StoreInterface as Store} from "../../store/store.interface";
 import {State as ComponentState} from "./state";
 
 @Component({
@@ -16,7 +16,7 @@ export class DemoProvider {
             counter: 1
         }
     })
-    public store: StoreInterface<ComponentState>;
+    public store: Store<ComponentState>;
 
     private subscription: Unsubscribable;
 

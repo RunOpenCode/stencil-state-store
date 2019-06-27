@@ -7,7 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { h } from "@stencil/core";
+import { Host, h } from "@stencil/core";
 import { Consume } from "../../decorator/consume";
 export class DemoConsumer {
     constructor() {
@@ -32,13 +32,13 @@ export class DemoConsumer {
         this.store.patch(state);
     }
     render() {
-        return (h("state-store-consumer", { consumer: this },
+        return (h(Host, null,
+            h("state-store-consumer", { consumer: this }),
             h("div", null,
                 "Current value rendered from consumer component: ",
                 h("span", null, this.counter)),
             h("div", null,
-                h("button", { onClick: this.increase.bind(this) }, "Increase counter from consumer")),
-            h("slot", null)));
+                h("button", { onClick: this.increase.bind(this) }, "Increase counter from consumer"))));
     }
     static get is() { return "demo-consumer"; }
     static get encapsulation() { return "shadow"; }

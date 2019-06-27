@@ -2,6 +2,9 @@ import {BehaviorSubject, Subscription, PartialObserver, Observable} from "rxjs";
 import {map}                                                        from "rxjs/operators";
 import {StoreInterface}                                             from "./store.interface";
 
+/**
+ * Default store implementation
+ */
 export class Store<T> implements StoreInterface<T> {
 
     /**
@@ -20,7 +23,30 @@ export class Store<T> implements StoreInterface<T> {
     }
 
     /**
-     * Set current state.
+     * @inheritdoc
+     */
+    public get observer(): Observable<T> {
+        return this._subject.asObservable();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public select(selector: (state: T | null) => void): Observable<any> {
+        return this._subject.pipe(
+            map(selector)
+        );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public snapshot(): T | null {
+        return this._snapshot;
+    }
+
+    /**
+     * @inheritDoc
      */
     public set(state: T): void {
         this._snapshot = state;
@@ -28,7 +54,7 @@ export class Store<T> implements StoreInterface<T> {
     }
 
     /**
-     * Patch current state.
+     * @inheritDoc
      */
     public patch(state: Partial<T>): void {
         this._snapshot = {
@@ -40,23 +66,15 @@ export class Store<T> implements StoreInterface<T> {
     }
 
     /**
-     * Select a slice of data from store.
+     * @inheritDoc
      */
-    public select(selector: (state: T | null) => void): Observable<any> {
-        return this._subject.pipe(
-            map(selector)
-        );
+    public error(err: any): void
+    {
+        this._subject.error(err);
     }
 
     /**
-     * Get current state.
-     */
-    public snapshot(): T | null {
-        return this._snapshot;
-    }
-
-    /**
-     * Subscribe to state.
+     * @inheritDoc
      */
     public subscribe(next?: PartialObserver<T> | ((value: T) => void)): Subscription {
         return this._subject.subscribe(next as any);

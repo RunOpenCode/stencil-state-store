@@ -14,9 +14,15 @@ export namespace Components {
   }
   interface DemoProvider {}
   interface StateStoreConsumer {
+    /**
+    * Consuming component.
+    */
     'consumer': any;
   }
   interface StateStoreProvider {
+    /**
+    * Providing component
+    */
     'provider': any;
   }
 }
@@ -61,11 +67,19 @@ declare namespace LocalJSX {
   }
   interface DemoProvider extends JSXBase.HTMLAttributes<HTMLDemoProviderElement> {}
   interface StateStoreConsumer extends JSXBase.HTMLAttributes<HTMLStateStoreConsumerElement> {
+    /**
+    * Consuming component.
+    */
     'consumer': any;
+    /**
+    * Request for store event.
+    */
     'onRunopencode:store:consumer:request'?: (event: CustomEvent<any>) => void;
   }
   interface StateStoreProvider extends JSXBase.HTMLAttributes<HTMLStateStoreProviderElement> {
-    'on@runopencode:store:provider:register'?: (event: CustomEvent<any>) => void;
+    /**
+    * Providing component
+    */
     'provider': any;
   }
 

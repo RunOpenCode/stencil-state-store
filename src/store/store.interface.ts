@@ -1,6 +1,24 @@
 import {Observable, PartialObserver, Subscribable, Subscription} from "rxjs";
 
+/**
+ * State store, manages state (notifies about changes, modifies current state).
+ */
 export interface StoreInterface<T> extends Subscribable<T> {
+
+    /**
+     * Get observable.
+     */
+    observer: Observable<T>;
+
+    /**
+     * Select slice of state.
+     */
+    select(selector: (state: T | null) => void): Observable<T>;
+
+    /**
+     * Get current state.
+     */
+    snapshot(): T | null;
 
     /**
      * Set state.
@@ -13,14 +31,9 @@ export interface StoreInterface<T> extends Subscribable<T> {
     patch(state: Partial<T>): void;
 
     /**
-     * Select slice of state.
+     * Notify observers about error.
      */
-    select(selector: (state: T | null) => void): Observable<any>;
-
-    /**
-     * Get current state.
-     */
-    snapshot(): T | null;
+    error(err: any): void;
 
     /**
      * Subscribe to state change.

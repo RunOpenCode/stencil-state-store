@@ -1,7 +1,5 @@
-'use strict';
-
 /**
- * Request for store emitted by consumer.
+ * Request for state store emitted by consumer.
  */
 class Request {
     constructor(name, consumer, property, method, callback) {
@@ -29,8 +27,11 @@ class Request {
 }
 
 const metadataRegistryKey = Symbol('@runopencode:state:consume:requests');
+/**
+ * Consume decorator, denotes state store which has to be provided to property/method.
+ */
 function Consume(options) {
-    return function (target, propertyKey, propertyDescriptior) {
+    return function decoratorFactory(target, propertyKey, propertyDescriptior) {
         options = Object.assign({ callback: null }, (options));
         let metadata = Reflect.getMetadata(metadataRegistryKey, target) || [];
         let descriptor = new Metadata(options.name, propertyKey, options.callback, propertyDescriptior ? 'method' : 'property');
@@ -38,6 +39,9 @@ function Consume(options) {
         Reflect.defineMetadata(metadataRegistryKey, metadata, target);
     };
 }
+/**
+ * Get all requests for state stores by given component instance.
+ */
 function getStoreRequests(instance) {
     let requests = [];
     let metadata = Reflect.getMetadata(metadataRegistryKey, instance);
@@ -51,6 +55,9 @@ function getStoreRequests(instance) {
     });
     return requests;
 }
+/**
+ * Request metadata provided via decorator.
+ */
 class Metadata {
     constructor(name, property, callback, type) {
         this._name = name;
@@ -868,39 +875,54 @@ class MapSubscriber extends Subscriber {
     }
 }
 
+/**
+ * Default store implementation
+ */
 class Store {
     constructor(state = null) {
         this._snapshot = state;
         this._subject = new BehaviorSubject(state);
     }
     /**
-     * Set current state.
+     * @inheritdoc
+     */
+    get observer() {
+        return this._subject.asObservable();
+    }
+    /**
+     * @inheritDoc
+     */
+    select(selector) {
+        return this._subject.pipe(map(selector));
+    }
+    /**
+     * @inheritDoc
+     */
+    snapshot() {
+        return this._snapshot;
+    }
+    /**
+     * @inheritDoc
      */
     set(state) {
         this._snapshot = state;
         this._subject.next(state);
     }
     /**
-     * Patch current state.
+     * @inheritDoc
      */
     patch(state) {
         this._snapshot = Object.assign({}, (this._snapshot || {}), state);
         this._subject.next(this._snapshot);
     }
     /**
-     * Select a slice of data from store.
+     * @inheritDoc
      */
-    select(selector) {
-        return this._subject.pipe(map(selector));
+    error(err) {
+        this._subject.error(err);
     }
     /**
-     * Get current state.
-     */
-    snapshot() {
-        return this._snapshot;
-    }
-    /**
-     * Subscribe to state.
+     * @inheritDoc
      */
     subscribe(next) {
         return this._subject.subscribe(next);
@@ -908,6 +930,9 @@ class Store {
 }
 
 const storesRegistryKey = Symbol('@runopencode:state:provide:registry');
+/**
+ * Provide decorator, denotes state store that is available for consumption.
+ */
 function Provide(options) {
     return function decoratorFactory(target, propertyKey) {
         options = Object.assign({ defaults: null }, (options));
@@ -932,6 +957,9 @@ function Provide(options) {
         Reflect.defineMetadata(storesRegistryKey, registeredStores, target);
     };
 }
+/**
+ * Get all state stores provided by component instance.
+ */
 function getRegisteredStores(instance) {
     let registry = Reflect.getMetadata(storesRegistryKey, instance);
     let result = new Map();
@@ -941,8 +969,4 @@ function getRegisteredStores(instance) {
     return result;
 }
 
-exports.Consume = Consume;
-exports.Provide = Provide;
-exports.Subject = Subject;
-exports.getRegisteredStores = getRegisteredStores;
-exports.getStoreRequests = getStoreRequests;
+export { Consume as C, Provide as P, Subject as S, getRegisteredStores as a, getStoreRequests as g };

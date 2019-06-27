@@ -1,5 +1,5 @@
 /**
- * Request for store emitted by consumer.
+ * Request for state store emitted by consumer.
  */
 export class Request {
     constructor(name, consumer, property, method, callback) {

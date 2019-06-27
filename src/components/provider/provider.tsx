@@ -1,6 +1,7 @@
-import {Component, Prop, h, EventEmitter, Event, Listen} from "@stencil/core";
+import {Component, Prop, Listen, h} from "@stencil/core";
 import {getRegisteredStores}                             from "../../decorator/provide";
 import {StoreInterface}                                  from "../../store/store.interface";
+import {Registry}                                        from "../../utils/registry";
 import {Request}                                         from "../../utils/request";
 
 @Component({
@@ -9,22 +10,30 @@ import {Request}                                         from "../../utils/reque
 })
 export class Provider {
 
+    /**
+     * Providing component
+     */
     @Prop()
     public provider!: any;
 
-    @Event({
-        eventName: '@runopencode:store:provider:register',
-        bubbles:   true
-    })
-    private register: EventEmitter;
-
+    /**
+     * Stores available for consumers to be requested.
+     */
     private stores: Map<string, StoreInterface<any>>;
 
+    /**
+     * Get list of registered stores from provider
+     * and notify registry that provider is ready for
+     * requests.
+     */
     public connectedCallback(): void {
         this.stores = getRegisteredStores(this.provider);
-        this.register.emit();
+        Registry.getInstance().notify();
     }
 
+    /**
+     * Listen for store requests.
+     */
     @Listen('runopencode:store:consumer:request')
     public onRequest(event: CustomEvent): void {
         let request: Request = event.detail;

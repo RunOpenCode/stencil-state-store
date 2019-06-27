@@ -1,7 +1,7 @@
-import { StoreInterface } from "../../store/store.interface";
+import { StoreInterface as Store } from "../../store/store.interface";
 import { State as ComponentState } from "./state";
 export declare class DemoProvider {
-    store: StoreInterface<ComponentState>;
+    store: Store<ComponentState>;
     private subscription;
     private counter;
     connectedCallback(): void;

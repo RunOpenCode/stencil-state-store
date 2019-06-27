@@ -3,6 +3,24 @@ import {StoreInterface} from "../store/store.interface";
 
 const storesRegistryKey = Symbol('@runopencode:state:provide:registry');
 
+/**
+ * Provide decorator options.
+ */
+export interface ProvideOptions {
+    /**
+     * Name of provided store.
+     */
+    name: string;
+
+    /**
+     * Inital store values.
+     */
+    defaults: { [key: string]: any } | null;
+}
+
+/**
+ * Provide decorator, denotes state store that is available for consumption.
+ */
 export function Provide(options: ProvideOptions) {
 
     return function decoratorFactory(target: any, propertyKey: string) {
@@ -39,6 +57,9 @@ export function Provide(options: ProvideOptions) {
     }
 }
 
+/**
+ * Get all state stores provided by component instance.
+ */
 export function getRegisteredStores(instance: any): Map<string, StoreInterface<any>> {
     let registry: Map<string, string>            = Reflect.getMetadata(storesRegistryKey, instance);
     let result: Map<string, StoreInterface<any>> = new Map<string, StoreInterface<any>>();
@@ -48,9 +69,4 @@ export function getRegisteredStores(instance: any): Map<string, StoreInterface<a
     });
 
     return result;
-}
-
-export interface ProvideOptions {
-    name: string;
-    defaults: { [key: string]: any };
 }

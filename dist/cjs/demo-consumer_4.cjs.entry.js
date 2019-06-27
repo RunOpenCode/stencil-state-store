@@ -2,8 +2,8 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const __chunk_1 = require('./chunk-0aed596e.js');
-const __chunk_2 = require('./chunk-8835a7c7.js');
+const __chunk_1 = require('./chunk-0bd109cf.js');
+const __chunk_2 = require('./chunk-9f4d44d5.js');
 
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -43,7 +43,7 @@ class DemoConsumer {
         this.store.patch(state);
     }
     render() {
-        return (__chunk_1.h("state-store-consumer", { consumer: this }, __chunk_1.h("div", null, "Current value rendered from consumer component: ", __chunk_1.h("span", null, this.counter)), __chunk_1.h("div", null, __chunk_1.h("button", { onClick: this.increase.bind(this) }, "Increase counter from consumer")), __chunk_1.h("slot", null)));
+        return (__chunk_1.h(__chunk_1.Host, null, __chunk_1.h("state-store-consumer", { consumer: this }), __chunk_1.h("div", null, "Current value rendered from consumer component: ", __chunk_1.h("span", null, this.counter)), __chunk_1.h("div", null, __chunk_1.h("button", { onClick: this.increase.bind(this) }, "Increase counter from consumer"))));
     }
 }
 __decorate([
@@ -110,15 +110,28 @@ __decorate$1([
     __metadata$1("design:type", Object)
 ], DemoProvider.prototype, "store", void 0);
 
+/**
+ * Registry deals with the issue of nondeterministic order
+ * of rendering each individual component, regardless
+ * of hierarchical position in DOM tree (parent, child).
+ */
 class Registry {
     constructor() {
+        /**
+         * Observable subject which notifies about new provider.
+         */
         this._subject = new __chunk_2.Subject();
-        document.addEventListener('@runopencode:store:provider:register', this.onProviderRegistered.bind(this));
     }
+    /**
+     * Subscribe for provider registration event.
+     */
     subscribe(next) {
         return this._subject.subscribe(next);
     }
-    onProviderRegistered() {
+    /**
+     * Notify subscribers that new provider has been attached to DOM
+     */
+    notify() {
         this._subject.next();
     }
     /**
@@ -135,12 +148,21 @@ class Registry {
 class Consumer {
     constructor(hostRef) {
         __chunk_1.registerInstance(this, hostRef);
+        /**
+         * List of all requested stores.
+         */
         this.requests = [];
+        /**
+         * Subscription to provider Registry.
+         */
         this.subscription = null;
         this.request = __chunk_1.createEvent(this, "runopencode:store:consumer:request", 7);
     }
     /**
-     * When provider is added to DOM, it should be registered in registry.
+     * When consumer is added to DOM, stores are required from provider(s).
+     *
+     * If there are no requested stores available, subscribe to a registry and
+     * wait until provider is available.
      */
     connectedCallback() {
         this.requests = __chunk_2.getStoreRequests(this.consumer);
@@ -153,7 +175,8 @@ class Consumer {
         });
     }
     /**
-     * When provider is removed from DOM, it should be unregistered from registry.
+     * When consumer is removed from DOM, unsubscribe from the registry
+     * and clear any remaining store requests from list.
      */
     disconnectedCallback() {
         if (this.subscription) {
@@ -165,17 +188,29 @@ class Consumer {
     render() {
         return (__chunk_1.h("slot", null));
     }
+    /**
+     * For each request for store from the list,
+     * fire request event which will bubble up to the provider,
+     * if provider is available.
+     */
     require() {
+        // list of satisfied requests
         let remove = [];
         this.requests.forEach((request) => {
+            // if default is prevented for the event
+            // that means that request for store is satisfied
+            // and it should be removed from the list
             if (this.request.emit(request).defaultPrevented) {
                 remove.push(request);
             }
         });
+        // remove all satisfied requests
         remove.forEach((request) => {
             this.requests.splice(this.requests.indexOf(request), 1);
         });
-        if (0 === this.requests.length) {
+        // if list of store requests is empty and there is subscription to
+        // registry, do unsubscribe.
+        if (0 === this.requests.length && null !== this.subscription) {
             this.subscription.unsubscribe();
             this.subscription = null;
         }
@@ -185,12 +220,19 @@ class Consumer {
 class Provider {
     constructor(hostRef) {
         __chunk_1.registerInstance(this, hostRef);
-        this.register = __chunk_1.createEvent(this, "@runopencode:store:provider:register", 7);
     }
+    /**
+     * Get list of registered stores from provider
+     * and notify registry that provider is ready for
+     * requests.
+     */
     connectedCallback() {
         this.stores = __chunk_2.getRegisteredStores(this.provider);
-        this.register.emit();
+        Registry.getInstance().notify();
     }
+    /**
+     * Listen for store requests.
+     */
     onRequest(event) {
         let request = event.detail;
         if (!this.stores.has(request.name)) {

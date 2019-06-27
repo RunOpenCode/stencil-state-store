@@ -1,3 +1,5 @@
+'use strict';
+
 const NAMESPACE = 'stencil-state-store';
 
 const win = window;
@@ -42,11 +44,11 @@ const consoleError = (e) => console.error(e);
 const loadModule = (cmpMeta, hostRef, hmrVersionId) => {
     // loadModuleImport
     const bundleId = cmpMeta.$lazyBundleIds$;
-    return import(
+    return Promise.resolve(require(
     /* webpackInclude: /\.entry\.js$/ */
     /* webpackExclude: /\.system\.entry\.js$/ */
     /* webpackMode: "lazy" */
-    `./${bundleId}.entry.js${''}`).then(importedModule => importedModule[cmpMeta.$tagName$.replace(/-/g, '_')], consoleError);
+    `./${bundleId}.entry.js${''}`)).then(importedModule => importedModule[cmpMeta.$tagName$.replace(/-/g, '_')], consoleError);
 };
 const cssVarShim = win.__stencil_cssshim;
 
@@ -140,13 +142,13 @@ const patchEsm = () => {
     // @ts-ignore
     if (!(win.CSS && win.CSS.supports && win.CSS.supports('color', 'var(--c)'))) {
         // @ts-ignore
-        return import('./css-shim-f7ddb189-f7ddb189.js');
+        return Promise.resolve(require('./css-shim-f7ddb189-673dd43d.js'));
     }
     return Promise.resolve();
 };
 const patchBrowser = async () => {
     // @ts-ignore
-    const importMeta = "";
+    const importMeta = (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('chunk-0bd109cf.js', document.baseURI).href));
     if (importMeta !== '') {
         return Promise.resolve(new URL('.', importMeta).href);
     }
@@ -157,7 +159,7 @@ const patchBrowser = async () => {
         patchDynamicImport(resourcesUrl.href);
         if (!window.customElements) {
             // @ts-ignore
-            await import('./dom-a0c82e31-a0c82e31.js');
+            await Promise.resolve(require('./dom-a0c82e31-d4621515.js'));
         }
         return resourcesUrl.href;
     }
@@ -2472,4 +2474,10 @@ var Reflect;
     });
 })(Reflect || (Reflect = {}));
 
-export { patchEsm as a, bootstrapLazy as b, createEvent as c, h, patchBrowser as p, registerInstance as r };
+exports.Host = Host;
+exports.bootstrapLazy = bootstrapLazy;
+exports.createEvent = createEvent;
+exports.h = h;
+exports.patchBrowser = patchBrowser;
+exports.patchEsm = patchEsm;
+exports.registerInstance = registerInstance;

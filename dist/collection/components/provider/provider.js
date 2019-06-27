@@ -1,10 +1,19 @@
 import { h } from "@stencil/core";
 import { getRegisteredStores } from "../../decorator/provide";
+import { Registry } from "../../utils/registry";
 export class Provider {
+    /**
+     * Get list of registered stores from provider
+     * and notify registry that provider is ready for
+     * requests.
+     */
     connectedCallback() {
         this.stores = getRegisteredStores(this.provider);
-        this.register.emit();
+        Registry.getInstance().notify();
     }
+    /**
+     * Listen for store requests.
+     */
     onRequest(event) {
         let request = event.detail;
         if (!this.stores.has(request.name)) {
@@ -41,28 +50,12 @@ export class Provider {
             "optional": false,
             "docs": {
                 "tags": [],
-                "text": ""
+                "text": "Providing component"
             },
             "attribute": "provider",
             "reflect": false
         }
     }; }
-    static get events() { return [{
-            "method": "register",
-            "name": "@runopencode:store:provider:register",
-            "bubbles": true,
-            "cancelable": true,
-            "composed": true,
-            "docs": {
-                "tags": [],
-                "text": ""
-            },
-            "complexType": {
-                "original": "any",
-                "resolved": "any",
-                "references": {}
-            }
-        }]; }
     static get listeners() { return [{
             "name": "runopencode:store:consumer:request",
             "method": "onRequest",
