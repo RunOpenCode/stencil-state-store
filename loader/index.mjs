@@ -1,3 +1,4 @@
+
 (function() {
   if (
     // No Reflect, no classes, no need for shim because native custom elements
@@ -18,4 +19,4 @@
 })();
 
 export * from '../dist/esm/polyfills/index.js';
-export * from '../dist/esm/legacy/loader.mjs';
+export * from '../dist/esm-es5/loader.mjs';

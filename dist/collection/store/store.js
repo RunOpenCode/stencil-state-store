@@ -37,7 +37,7 @@ export class Store {
      * @inheritDoc
      */
     patch(state) {
-        this._snapshot = Object.assign({}, (this._snapshot || {}), state);
+        this._snapshot = Object.assign(Object.assign({}, (this._snapshot || {})), state);
         this._subject.next(this._snapshot);
     }
     /**

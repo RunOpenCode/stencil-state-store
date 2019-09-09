@@ -1,6 +1,6 @@
 import { h } from "@stencil/core";
-import { getStoreRequests } from "../../decorator/consume";
-import { Registry } from "../../utils/registry";
+import { getStoreRequests } from '../../decorator/consume';
+import { Registry } from '../../utils/registry';
 export class Consumer {
     constructor() {
         /**
@@ -70,7 +70,6 @@ export class Consumer {
         }
     }
     static get is() { return "state-store-consumer"; }
-    static get encapsulation() { return "shadow"; }
     static get properties() { return {
         "consumer": {
             "type": "any",

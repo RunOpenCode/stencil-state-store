@@ -1,12 +1,12 @@
-import {Component, Prop, Listen, h} from "@stencil/core";
-import {getRegisteredStores}                             from "../../decorator/provide";
-import {StoreInterface}                                  from "../../store/store.interface";
-import {Registry}                                        from "../../utils/registry";
-import {Request}                                         from "../../utils/request";
+import {Component, Prop, Listen, h} from '@stencil/core';
+import {getRegisteredStores}        from '../../decorator/provide';
+import {StoreInterface}             from '../../store/store.interface';
+import {Registry}                   from '../../utils/registry';
+import {Request}                    from '../../utils/request';
 
 @Component({
     tag:    'state-store-provider',
-    shadow: true
+    shadow: false,
 })
 export class Provider {
 

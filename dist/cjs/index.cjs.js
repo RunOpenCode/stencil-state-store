@@ -2,9 +2,9 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const __chunk_2 = require('./chunk-9f4d44d5.js');
+const provide = require('./provide-1f64c90f.js');
 
 
 
-exports.Consume = __chunk_2.Consume;
-exports.Provide = __chunk_2.Provide;
+exports.Consume = provide.Consume;
+exports.Provide = provide.Provide;

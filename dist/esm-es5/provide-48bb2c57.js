@@ -164,19 +164,22 @@ var empty = {
     },
     complete: function () { }
 };
-var isArray = Array.isArray || (function (x) { return x && typeof x.length === 'number'; });
+var isArray = (function () { return Array.isArray || (function (x) { return x && typeof x.length === 'number'; }); })();
 function isObject(x) {
     return x !== null && typeof x === 'object';
 }
-function UnsubscriptionErrorImpl(errors) {
-    Error.call(this);
-    this.message = errors ?
-        errors.length + " errors occurred during unsubscription:\n" + errors.map(function (err, i) { return i + 1 + ") " + err.toString(); }).join('\n  ') : '';
-    this.name = 'UnsubscriptionError';
-    this.errors = errors;
-    return this;
-}
-UnsubscriptionErrorImpl.prototype = Object.create(Error.prototype);
+var UnsubscriptionErrorImpl = (function () {
+    function UnsubscriptionErrorImpl(errors) {
+        Error.call(this);
+        this.message = errors ?
+            errors.length + " errors occurred during unsubscription:\n" + errors.map(function (err, i) { return i + 1 + ") " + err.toString(); }).join('\n  ') : '';
+        this.name = 'UnsubscriptionError';
+        this.errors = errors;
+        return this;
+    }
+    UnsubscriptionErrorImpl.prototype = Object.create(Error.prototype);
+    return UnsubscriptionErrorImpl;
+})();
 var UnsubscriptionError = UnsubscriptionErrorImpl;
 var Subscription = /** @class */ (function () {
     function Subscription(unsubscribe) {
@@ -307,9 +310,9 @@ Subscription.EMPTY = (function (empty) {
 function flattenUnsubscriptionErrors(errors) {
     return errors.reduce(function (errs, err) { return errs.concat((err instanceof UnsubscriptionError) ? err.errors : err); }, []);
 }
-var rxSubscriber = typeof Symbol === 'function'
+var rxSubscriber = (function () { return typeof Symbol === 'function'
     ? Symbol('rxSubscriber')
-    : '@@rxSubscriber_' + Math.random();
+    : '@@rxSubscriber_' + Math.random(); })();
 var Subscriber = /** @class */ (function (_super) {
     __extends(Subscriber, _super);
     function Subscriber(destinationOrNext, error, complete) {
@@ -561,7 +564,7 @@ function toSubscriber(nextOrObserver, error, complete) {
     }
     return new Subscriber(nextOrObserver, error, complete);
 }
-var observable = typeof Symbol === 'function' && Symbol.observable || '@@observable';
+var observable = (function () { return typeof Symbol === 'function' && Symbol.observable || '@@observable'; })();
 function noop() { }
 function pipeFromArray(fns) {
     if (!fns) {
@@ -682,13 +685,16 @@ function getPromiseCtor(promiseCtor) {
     }
     return promiseCtor;
 }
-function ObjectUnsubscribedErrorImpl() {
-    Error.call(this);
-    this.message = 'object unsubscribed';
-    this.name = 'ObjectUnsubscribedError';
-    return this;
-}
-ObjectUnsubscribedErrorImpl.prototype = Object.create(Error.prototype);
+var ObjectUnsubscribedErrorImpl = (function () {
+    function ObjectUnsubscribedErrorImpl() {
+        Error.call(this);
+        this.message = 'object unsubscribed';
+        this.name = 'ObjectUnsubscribedError';
+        return this;
+    }
+    ObjectUnsubscribedErrorImpl.prototype = Object.create(Error.prototype);
+    return ObjectUnsubscribedErrorImpl;
+})();
 var ObjectUnsubscribedError = ObjectUnsubscribedErrorImpl;
 var SubjectSubscription = /** @class */ (function (_super) {
     __extends(SubjectSubscription, _super);
@@ -982,7 +988,7 @@ var Store = /** @class */ (function () {
      * @inheritDoc
      */
     Store.prototype.patch = function (state) {
-        this._snapshot = Object.assign({}, (this._snapshot || {}), state);
+        this._snapshot = Object.assign(Object.assign({}, (this._snapshot || {})), state);
         this._subject.next(this._snapshot);
     };
     /**

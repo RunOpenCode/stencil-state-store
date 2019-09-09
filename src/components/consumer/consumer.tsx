@@ -1,12 +1,12 @@
-import {Component, Prop, EventEmitter, Event, h} from "@stencil/core";
-import {Subscription}                            from "rxjs";
-import {getStoreRequests}                        from "../../decorator/consume";
-import {Registry}                                from "../../utils/registry";
-import {Request}                                 from "../../utils/request";
+import {Component, Prop, EventEmitter, Event, h} from '@stencil/core';
+import {Subscription}                            from 'rxjs';
+import {getStoreRequests}                        from '../../decorator/consume';
+import {Registry}                                from '../../utils/registry';
+import {Request}                                 from '../../utils/request';
 
 @Component({
     tag:    'state-store-consumer',
-    shadow: true
+    shadow: false,
 })
 export class Consumer {
 
@@ -98,7 +98,7 @@ export class Consumer {
 
         // remove all satisfied requests
         remove.forEach((request: Request) => {
-            this.requests.splice( this.requests.indexOf(request), 1);
+            this.requests.splice(this.requests.indexOf(request), 1);
         });
 
         // if list of store requests is empty and there is subscription to

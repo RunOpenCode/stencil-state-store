@@ -2,8 +2,8 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const __chunk_1 = require('./chunk-0bd109cf.js');
-const __chunk_2 = require('./chunk-9f4d44d5.js');
+const core = require('./core-438c036f.js');
+const provide = require('./provide-1f64c90f.js');
 
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -19,9 +19,9 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
         return Reflect.metadata(k, v);
 };
-class DemoConsumer {
+const DemoConsumer = class {
     constructor(hostRef) {
-        __chunk_1.registerInstance(this, hostRef);
+        core.registerInstance(this, hostRef);
         this.prop = null;
     }
     injectStore(store) {
@@ -43,18 +43,18 @@ class DemoConsumer {
         this.store.patch(state);
     }
     render() {
-        return (__chunk_1.h(__chunk_1.Host, null, __chunk_1.h("state-store-consumer", { consumer: this }), __chunk_1.h("div", null, "Current value rendered from consumer component: ", __chunk_1.h("span", null, this.counter)), __chunk_1.h("div", null, __chunk_1.h("button", { onClick: this.increase.bind(this) }, "Increase counter from consumer"))));
+        return (core.h(core.Host, null, core.h("state-store-consumer", { consumer: this }), core.h("div", null, "Current value rendered from consumer component: ", core.h("span", null, this.counter)), core.h("div", null, core.h("button", { onClick: this.increase.bind(this) }, "Increase counter from consumer"))));
     }
-}
+};
 __decorate([
-    __chunk_2.Consume({
+    provide.Consume({
         name: 'demo-store',
         callback: 'onDefaultStoreProvided'
     }),
     __metadata("design:type", Object)
 ], DemoConsumer.prototype, "store", void 0);
 __decorate([
-    __chunk_2.Consume({
+    provide.Consume({
         name: 'demo-store',
         callback: (store) => {
             console.log('After store is injected, callback function is invoked.', store);
@@ -79,9 +79,9 @@ var __metadata$1 = (undefined && undefined.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
         return Reflect.metadata(k, v);
 };
-class DemoProvider {
+const DemoProvider = class {
     constructor(hostRef) {
-        __chunk_1.registerInstance(this, hostRef);
+        core.registerInstance(this, hostRef);
     }
     connectedCallback() {
         this.subscription = this.store.subscribe((state) => {
@@ -97,11 +97,11 @@ class DemoProvider {
         this.store.patch(state);
     }
     render() {
-        return (__chunk_1.h("state-store-provider", { provider: this }, __chunk_1.h("div", null, "Current value rendered from provider component: ", __chunk_1.h("span", null, this.counter)), __chunk_1.h("div", null, __chunk_1.h("button", { onClick: this.increase.bind(this) }, "Increase counter from provider")), __chunk_1.h("slot", null)));
+        return (core.h("state-store-provider", { provider: this }, core.h("div", null, "Current value rendered from provider component: ", core.h("span", null, this.counter)), core.h("div", null, core.h("button", { onClick: this.increase.bind(this) }, "Increase counter from provider")), core.h("slot", null)));
     }
-}
+};
 __decorate$1([
-    __chunk_2.Provide({
+    provide.Provide({
         name: 'demo-store',
         defaults: {
             counter: 1
@@ -120,7 +120,7 @@ class Registry {
         /**
          * Observable subject which notifies about new provider.
          */
-        this._subject = new __chunk_2.Subject();
+        this._subject = new provide.Subject();
     }
     /**
      * Subscribe for provider registration event.
@@ -145,9 +145,9 @@ class Registry {
     }
 }
 
-class Consumer {
+const Consumer = class {
     constructor(hostRef) {
-        __chunk_1.registerInstance(this, hostRef);
+        core.registerInstance(this, hostRef);
         /**
          * List of all requested stores.
          */
@@ -156,7 +156,7 @@ class Consumer {
          * Subscription to provider Registry.
          */
         this.subscription = null;
-        this.request = __chunk_1.createEvent(this, "runopencode:store:consumer:request", 7);
+        this.request = core.createEvent(this, "runopencode:store:consumer:request", 7);
     }
     /**
      * When consumer is added to DOM, stores are required from provider(s).
@@ -165,7 +165,7 @@ class Consumer {
      * wait until provider is available.
      */
     connectedCallback() {
-        this.requests = __chunk_2.getStoreRequests(this.consumer);
+        this.requests = provide.getStoreRequests(this.consumer);
         this.require();
         if (0 === this.requests.length) {
             return;
@@ -186,7 +186,7 @@ class Consumer {
         this.requests = [];
     }
     render() {
-        return (__chunk_1.h("slot", null));
+        return (core.h("slot", null));
     }
     /**
      * For each request for store from the list,
@@ -215,11 +215,11 @@ class Consumer {
             this.subscription = null;
         }
     }
-}
+};
 
-class Provider {
+const Provider = class {
     constructor(hostRef) {
-        __chunk_1.registerInstance(this, hostRef);
+        core.registerInstance(this, hostRef);
     }
     /**
      * Get list of registered stores from provider
@@ -227,7 +227,7 @@ class Provider {
      * requests.
      */
     connectedCallback() {
-        this.stores = __chunk_2.getRegisteredStores(this.provider);
+        this.stores = provide.getRegisteredStores(this.provider);
         Registry.getInstance().notify();
     }
     /**
@@ -252,9 +252,9 @@ class Provider {
         }
     }
     render() {
-        return (__chunk_1.h("slot", null));
+        return (core.h("slot", null));
     }
-}
+};
 
 exports.demo_consumer = DemoConsumer;
 exports.demo_provider = DemoProvider;

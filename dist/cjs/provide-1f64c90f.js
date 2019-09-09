@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Request for state store emitted by consumer.
  */
@@ -119,22 +121,25 @@ const empty = {
     complete() { }
 };
 
-const isArray = Array.isArray || ((x) => x && typeof x.length === 'number');
+const isArray = (() => Array.isArray || ((x) => x && typeof x.length === 'number'))();
 
 function isObject(x) {
     return x !== null && typeof x === 'object';
 }
 
-function UnsubscriptionErrorImpl(errors) {
-    Error.call(this);
-    this.message = errors ?
-        `${errors.length} errors occurred during unsubscription:
+const UnsubscriptionErrorImpl = (() => {
+    function UnsubscriptionErrorImpl(errors) {
+        Error.call(this);
+        this.message = errors ?
+            `${errors.length} errors occurred during unsubscription:
 ${errors.map((err, i) => `${i + 1}) ${err.toString()}`).join('\n  ')}` : '';
-    this.name = 'UnsubscriptionError';
-    this.errors = errors;
-    return this;
-}
-UnsubscriptionErrorImpl.prototype = Object.create(Error.prototype);
+        this.name = 'UnsubscriptionError';
+        this.errors = errors;
+        return this;
+    }
+    UnsubscriptionErrorImpl.prototype = Object.create(Error.prototype);
+    return UnsubscriptionErrorImpl;
+})();
 const UnsubscriptionError = UnsubscriptionErrorImpl;
 
 class Subscription {
@@ -266,9 +271,9 @@ function flattenUnsubscriptionErrors(errors) {
     return errors.reduce((errs, err) => errs.concat((err instanceof UnsubscriptionError) ? err.errors : err), []);
 }
 
-const rxSubscriber = typeof Symbol === 'function'
+const rxSubscriber = (() => typeof Symbol === 'function'
     ? Symbol('rxSubscriber')
-    : '@@rxSubscriber_' + Math.random();
+    : '@@rxSubscriber_' + Math.random())();
 
 class Subscriber extends Subscription {
     constructor(destinationOrNext, error, complete) {
@@ -517,7 +522,7 @@ function toSubscriber(nextOrObserver, error, complete) {
     return new Subscriber(nextOrObserver, error, complete);
 }
 
-const observable = typeof Symbol === 'function' && Symbol.observable || '@@observable';
+const observable = (() => typeof Symbol === 'function' && Symbol.observable || '@@observable')();
 
 function noop() { }
 
@@ -627,7 +632,7 @@ Observable.create = (subscribe) => {
 };
 function getPromiseCtor(promiseCtor) {
     if (!promiseCtor) {
-        promiseCtor = Promise;
+        promiseCtor =  Promise;
     }
     if (!promiseCtor) {
         throw new Error('no Promise impl found');
@@ -635,13 +640,16 @@ function getPromiseCtor(promiseCtor) {
     return promiseCtor;
 }
 
-function ObjectUnsubscribedErrorImpl() {
-    Error.call(this);
-    this.message = 'object unsubscribed';
-    this.name = 'ObjectUnsubscribedError';
-    return this;
-}
-ObjectUnsubscribedErrorImpl.prototype = Object.create(Error.prototype);
+const ObjectUnsubscribedErrorImpl = (() => {
+    function ObjectUnsubscribedErrorImpl() {
+        Error.call(this);
+        this.message = 'object unsubscribed';
+        this.name = 'ObjectUnsubscribedError';
+        return this;
+    }
+    ObjectUnsubscribedErrorImpl.prototype = Object.create(Error.prototype);
+    return ObjectUnsubscribedErrorImpl;
+})();
 const ObjectUnsubscribedError = ObjectUnsubscribedErrorImpl;
 
 class SubjectSubscription extends Subscription {
@@ -912,7 +920,7 @@ class Store {
      * @inheritDoc
      */
     patch(state) {
-        this._snapshot = Object.assign({}, (this._snapshot || {}), state);
+        this._snapshot = Object.assign(Object.assign({}, (this._snapshot || {})), state);
         this._subject.next(this._snapshot);
     }
     /**
@@ -969,4 +977,8 @@ function getRegisteredStores(instance) {
     return result;
 }
 
-export { Consume as C, Provide as P, Subject as S, getRegisteredStores as a, getStoreRequests as g };
+exports.Consume = Consume;
+exports.Provide = Provide;
+exports.Subject = Subject;
+exports.getRegisteredStores = getRegisteredStores;
+exports.getStoreRequests = getStoreRequests;

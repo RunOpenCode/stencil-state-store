@@ -1,6 +1,6 @@
 import { h } from "@stencil/core";
-import { getRegisteredStores } from "../../decorator/provide";
-import { Registry } from "../../utils/registry";
+import { getRegisteredStores } from '../../decorator/provide';
+import { Registry } from '../../utils/registry';
 export class Provider {
     /**
      * Get list of registered stores from provider
@@ -36,7 +36,6 @@ export class Provider {
         return (h("slot", null));
     }
     static get is() { return "state-store-provider"; }
-    static get encapsulation() { return "shadow"; }
     static get properties() { return {
         "provider": {
             "type": "any",

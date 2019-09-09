@@ -1,5 +1,5 @@
-import { r as registerInstance, h, H as Host, c as createEvent } from './chunk-b79728d4.js';
-import { C as Consume, P as Provide, S as Subject, g as getStoreRequests, a as getRegisteredStores } from './chunk-89892b30.js';
+import { r as registerInstance, h, H as Host, c as createEvent } from './core-00f54f38.js';
+import { C as Consume, P as Provide, S as Subject, g as getStoreRequests, a as getRegisteredStores } from './provide-48bb2c57.js';
 
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -15,7 +15,7 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
         return Reflect.metadata(k, v);
 };
-class DemoConsumer {
+const DemoConsumer = class {
     constructor(hostRef) {
         registerInstance(this, hostRef);
         this.prop = null;
@@ -41,7 +41,7 @@ class DemoConsumer {
     render() {
         return (h(Host, null, h("state-store-consumer", { consumer: this }), h("div", null, "Current value rendered from consumer component: ", h("span", null, this.counter)), h("div", null, h("button", { onClick: this.increase.bind(this) }, "Increase counter from consumer"))));
     }
-}
+};
 __decorate([
     Consume({
         name: 'demo-store',
@@ -75,7 +75,7 @@ var __metadata$1 = (undefined && undefined.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
         return Reflect.metadata(k, v);
 };
-class DemoProvider {
+const DemoProvider = class {
     constructor(hostRef) {
         registerInstance(this, hostRef);
     }
@@ -95,7 +95,7 @@ class DemoProvider {
     render() {
         return (h("state-store-provider", { provider: this }, h("div", null, "Current value rendered from provider component: ", h("span", null, this.counter)), h("div", null, h("button", { onClick: this.increase.bind(this) }, "Increase counter from provider")), h("slot", null)));
     }
-}
+};
 __decorate$1([
     Provide({
         name: 'demo-store',
@@ -141,7 +141,7 @@ class Registry {
     }
 }
 
-class Consumer {
+const Consumer = class {
     constructor(hostRef) {
         registerInstance(this, hostRef);
         /**
@@ -211,9 +211,9 @@ class Consumer {
             this.subscription = null;
         }
     }
-}
+};
 
-class Provider {
+const Provider = class {
     constructor(hostRef) {
         registerInstance(this, hostRef);
     }
@@ -250,6 +250,6 @@ class Provider {
     render() {
         return (h("slot", null));
     }
-}
+};
 
 export { DemoConsumer as demo_consumer, DemoProvider as demo_provider, Consumer as state_store_consumer, Provider as state_store_provider };
