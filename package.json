@@ -1,6 +1,6 @@
 {
     "name": "@runopencode/stencil-state-store",
-    "version": "0.0.4",
+    "version": "1.0.0",
     "description": "Light state store management for Stencil",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
@@ -20,12 +20,12 @@
         "test": "stencil test --spec --e2e",
         "test.watch": "stencil test --spec --e2e --watchAll"
     },
-    "devDependencies": {
-        "@stencil/core": "^1.4.0"
-    },
     "license": "MIT",
     "dependencies": {
-        "reflect-metadata": "^0.1.13",
-        "rxjs": "^6.5.3"
+        "reflect-metadata": "^0.1",
+        "rxjs": "^6.5.4"
+    },
+    "devDependencies": {
+        "@stencil/core": "^1.10"
     }
 }

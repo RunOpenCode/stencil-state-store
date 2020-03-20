@@ -1,9 +1,9 @@
-import { EventEmitter } from '../../stencil.core';
-export declare class Consumer {
+import { EventEmitter, ComponentInterface, h } from '@stencil/core';
+export declare class Consumer implements ComponentInterface {
     /**
      * Consuming component.
      */
-    consumer: any;
+    consumer: ComponentInterface;
     /**
      * Request for store event.
      */
@@ -28,11 +28,11 @@ export declare class Consumer {
      * and clear any remaining store requests from list.
      */
     disconnectedCallback(): void;
-    render(): any;
     /**
      * For each request for store from the list,
      * fire request event which will bubble up to the provider,
      * if provider is available.
      */
     private require;
+    render(): h.JSX.IntrinsicElements;
 }

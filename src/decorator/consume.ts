@@ -1,67 +1,56 @@
-import {StoreInterface} from "../store/store.interface";
-import {Request}        from "../utils/request";
+import { ComponentInterface } from '@stencil/core';
+import { Deferred }           from '../utils/deferred';
+import { Request }            from '../utils/request';
 
-const metadataRegistryKey = Symbol('@runopencode:state:consume:requests');
-
-/**
- * Consume decorator options.
- */
-export interface ConsumeOptions {
-    /**
-     * Name of the required store
-     */
-    name: string;
-
-    /**
-     * Function which has to be invoked after store is provide
-     */
-    callback?: ((store: StoreInterface<any>) => void) | string | null;
-}
+const metadataRegistryKey = '@runopencode:state:consume:requests';
 
 /**
- * Consume decorator, denotes state store which has to be provided to property/method.
+ * Consume decorator, denotes state store which has to be provided to property.
+ *
+ * @param {string} name Name of the store to consume.
  */
-export function Consume(options: ConsumeOptions): any {
+export function Consume(name: string): any {
 
-    return function decoratorFactory(target: Object, propertyKey: string, propertyDescriptior: PropertyDescriptor) {
-
-        options                  = {
-            ...{callback: null},
-            ...(options)
-        };
+    return function decoratorFactory(target: Object, propertyKey: string) {
         let metadata: Metadata[] = Reflect.getMetadata(metadataRegistryKey, target) || [];
-        let descriptor           = new Metadata(
-            options.name,
-            propertyKey,
-            options.callback,
-            propertyDescriptior ? 'method' : 'property'
-        );
+        let descriptor           = new Metadata(name, propertyKey);
+        let field                = `__${propertyKey}__`;
 
         metadata.push(descriptor);
         Reflect.defineMetadata(metadataRegistryKey, metadata, target);
+
+        delete target.constructor.prototype[propertyKey];
+
+        Object.defineProperty(target.constructor.prototype, propertyKey, {
+            configurable: true,
+            enumerable:   true,
+            get:          function () {
+                if (!this[field]) {
+                    Object.defineProperty(this, field, {
+                        value:      new Deferred(),
+                        enumerable: false,
+                        writable:   false,
+                    });
+                }
+
+                return this[field];
+            },
+        });
     }
 }
 
 /**
  * Get all requests for state stores by given component instance.
  */
-export function getStoreRequests(instance: any): Request[] {
-    let requests: Request[]           = [];
-    let metadata: Metadata[]          = Reflect.getMetadata(metadataRegistryKey, instance);
+export function getStoreRequests(instance: ComponentInterface): Request[] {
+    let requests: Request[]  = [];
+    let metadata: Metadata[] = Reflect.getMetadata(metadataRegistryKey, instance);
 
     metadata.forEach((metadata: Metadata) => {
-        let callback: (() => void) | null = metadata.callback as (() => void) | null;
-
-        if ('string' === typeof metadata.callback) {
-            callback = instance[metadata.callback];
-        }
-
         let request = new Request(
             metadata.name,
+            metadata.property,
             instance,
-            'property' === metadata.type ? metadata.property : null,
-            'method' === metadata.type ? instance[metadata.property] : null,
-            callback
         );
 
         requests.push(request);
@@ -81,25 +70,13 @@ class Metadata {
     private readonly _name: string;
 
     /**
-     * Name of property/method for which decorator is attached.
+     * Name of property for which decorator is attached.
      */
     private readonly _property: string;
 
-    /**
-     * Callback function that needs to be invoked (if any) when store is provided.
-     */
-    private readonly _callback: ((store: StoreInterface<any>) => void) | string | null;
-
-    /**
-     * Denotes if decorator decorates property or method.
-     */
-    private readonly _type: 'property' | 'method';
-
-    constructor(name: string, property: string, callback: ((store: StoreInterface<any>) => void) | string | null, type: 'property' | 'method') {
+    constructor(name: string, property: string) {
         this._name     = name;
         this._property = property;
-        this._callback = callback;
-        this._type     = type;
     }
 
     public get name(): string {
@@ -108,13 +85,5 @@ class Metadata {
 
     public get property(): string {
         return this._property;
-    }
-
-    public get callback(): ((store: StoreInterface<any>) => void) | string | null {
-        return this._callback;
-    }
-
-    public get type(): "property" | "method" {
-        return this._type;
     }
 }

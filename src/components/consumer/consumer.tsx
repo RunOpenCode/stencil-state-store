@@ -1,20 +1,20 @@
-import {Component, Prop, EventEmitter, Event, h} from '@stencil/core';
-import {Subscription}                            from 'rxjs';
-import {getStoreRequests}                        from '../../decorator/consume';
-import {Registry}                                from '../../utils/registry';
-import {Request}                                 from '../../utils/request';
+import { Component, Prop, EventEmitter, Event, ComponentInterface, Host, h } from '@stencil/core';
+import { Subscription }                                                      from 'rxjs';
+import { getStoreRequests }                                                  from '../../decorator/consume';
+import { Registry }                                                          from '../../utils/registry';
+import { Request }                                                           from '../../utils/request';
 
 @Component({
     tag:    'state-store-consumer',
     shadow: false,
 })
-export class Consumer {
+export class Consumer implements ComponentInterface {
 
     /**
      * Consuming component.
      */
     @Prop()
-    public consumer!: any;
+    public consumer!: ComponentInterface;
 
     /**
      * Request for store event.
@@ -70,12 +70,6 @@ export class Consumer {
         this.requests = [];
     }
 
-    public render() {
-        return (
-            <slot/>
-        )
-    }
-
     /**
      * For each request for store from the list,
      * fire request event which will bubble up to the provider,
@@ -107,5 +101,13 @@ export class Consumer {
             this.subscription.unsubscribe();
             this.subscription = null;
         }
+    }
+
+    public render(): h.JSX.IntrinsicElements {
+        return (
+            <Host>
+                <slot/>
+            </Host>
+        )
     }
 }

@@ -1,16 +1,16 @@
 {
   "entries": [
-    "components/consumer/consumer.js",
-    "components/demo/demo-consumer.js",
-    "components/demo/demo-provider.js",
-    "components/provider/provider.js"
+    "./components/consumer/consumer.js",
+    "./components/provider/provider.js",
+    "./demo/demo-consumer.js",
+    "./demo/demo-provider.js"
   ],
   "compiler": {
     "name": "@stencil/core",
-    "version": "1.4.0",
-    "typescriptVersion": "3.6.2"
+    "version": "1.10.3",
+    "typescriptVersion": "3.8.3"
   },
   "collections": [],
   "bundles": [],
-  "global": "global/index.js"
+  "global": "./global/index.js"
 }

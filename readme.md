@@ -53,15 +53,15 @@ provide for them a shared state store, that is, an instance of `StoreInterface` 
 instance of `CarouselState`.
 
 ````
-import {Component, h}      from "@stencil/core";
-import {Provide, Store}    from "@runopencode/stencil-state-store";
-import {CarouselState}     from "./state";
+import {Component, ComponentInterface, Host, h}      from "@stencil/core";
+import {Provide, Store}                              from "@runopencode/stencil-state-store";
+import {CarouselState}                               from "./state";
 
 @Component({
     tag:    'runopencode-carousel',
     shadow: true,
 })
-export class Carousel {
+export class Carousel implements ComponentInterface {
     
         @Provide({
             name:     'runopencode-carousel-store',
@@ -69,25 +69,41 @@ export class Carousel {
                 page: 1
             }
         })
-        public store: Store<CarouselState>;
+        private store: Store<CarouselState>;
         
         public render() {
             return (
-                <state-store-provider provider={this}>               
-                    <slot/>
-                </state-store-provider>
+                <Host>
+                    <state-store-provider provider={this}>               
+                        <slot/>
+                    </state-store-provider>
+                </Host>
             );
         }
 }
 ````
 
+Note that it is even possible not to wrap content within `<state-store-provider>` tag, you may 
+just provide a component as direct child of `<Host>` within `render()` method. Example:
+
+````
+public render() {
+    return (
+        <Host>
+            <state-store-provider provider={this}/>
+            <slot/>
+        </Host>
+    );
+}
+```` 
+
 Component `runopencode-carousel-pager` can consume that state store:
 
 ````
-import {Component, h}      from "@stencil/core";
-import {Provide, Store}    from "@runopencode/stencil-state-store";
-import {CarouselState}     from "./state";
-import {Unsubscribable}    from "rxjs";
+import {Component, ComponentInterface, Host, h}      from "@stencil/core";
+import {Provide, Store}                              from "@runopencode/stencil-state-store";
+import {CarouselState}                               from "./state";
+import {Unsubscribable}                              from "rxjs";
 
 @Component({
     tag:    'runopencode-carousel-pager',
@@ -95,16 +111,17 @@ import {Unsubscribable}    from "rxjs";
 })
 export class CarouselPager {
     
+    @Consume('runopencode-carousel-store')
+    private store: Promise<Store<CarouselState>>;
+
     @State()
     private page: number;
         
     private subscription: Unsubscribable;
     
-    @Consume({
-        name: 'runopencode-carousel-store'
-    })
-    public consume(store: Store<CarouselState>): void {
-        this.subscription = this.store.subscribe((state: CarouselState) => {
+    public componentDidLoad(): void {
+        let store: Store<CarouselState> = await this.store;
+        this.subscription = store.subscribe((state: CarouselState) => {
             this.page = state.page;
         });
     }
@@ -115,17 +132,18 @@ export class CarouselPager {
     
     public render() {
         return (
-            <state-store-consumer consumer={this}>
-                <div>
-                    Current slide is {this.page}
-                </div>
-            </state-store-consumer>
+            <Host>
+            <state-store-consumer consumer={this}/>
+            <div>
+                Current slide is {this.page}
+            </div>           
+            </Host>
         );
     }
 }
 ````
 
-So, there is one few classes, decorators and interfaces involved here.
+So, there are few classes, decorators and interfaces involved here.
 
 1. You need to define your state interface. It is simple key, value pair, defined by following:
 
@@ -148,15 +166,16 @@ public store: Store<CarouselState>;
 
 ````
 
-That component must use `state-store-provider` component, wrapping child components within slot(s),
-with `provider` property referencing to `this` when rendering component.
+That component must use `state-store-provider` component, with `provider` property referencing 
+to `this` when rendering component.
 
 ````
 public render() {
     return (
-        <state-store-provider provider={this}>               
+        <Host>
+            <state-store-provider provider={this}/>
             <slot/>
-        </state-store-provider>
+        </Host>
     );
 }
 ```` 
@@ -164,47 +183,32 @@ public render() {
 3. You have to consume your state
 
 ````
-@Consume({
-    name: 'runopencode-carousel-store'
-})
-public consume(store: Store<CarouselState>): void {
-    this.subscription = this.store.subscribe((state: CarouselState) => {
+@Consume('runopencode-carousel-store')
+private store: Promise<Store<CarouselState>>;
+````
+
+4. Trough subscription you can follow changes of state and update your component state:
+
+````
+public componentDidLoad(): void {
+    let store: Store<CarouselState> = await this.store;
+    this.subscription = store.subscribe((state: CarouselState) => {
         this.page = state.page;
     });
-}
+}    
 ````
 
-Note that you can consume store trough component property, as well as trough component method. 
-If you are using a property for consumption, you can define a callback to invoke when store 
-is provided. A callback function will have `this` pointing to that particular component instance.
+**IMPORTANT NOTES:**
 
-Example:
-````
-@Consume({
-    name: 'runopencode-carousel-store',   
-    callback: function() {
-        this.subscription = this.store.subscribe((state: CarouselState) => {
-            this.page = state.page;
-        });
-    }
-})
-public consume: Store<CarouselState>;
-````
-
-Consuming component must use `state-store-consumer` component, with `consumer` property 
-referencing to `this` when rendering component.
-
-````
-public render() {
-    return (
-        <div>
-            <state-store-consumer consumer={this}>               
-        </div>        
-    );
-}
-````
-
-Trough subscription you can follow changes of state.
+- Consuming component (consumer) should subscribe for state change in `componentDidLoad`
+lifecycle method. This is stenciljs limitation, component must be rendered in order to 
+require for shared state. 
+- You might notice that Promise will be provided to consumer, not the state. There is
+no guarantee in component rendering order (event though there is clear parent-child 
+relation), therefore, providing operation is async.
+- If Promise for store in consuming component is returned in `componentWillLoad` or
+`componentWillRender` lifecycle methods, child component will never be rendered, have
+that in mind.
 
 ## State store implementation. 
 
@@ -255,4 +259,8 @@ export interface Store<T> extends Subscribable<T> {
 
 See demo on YouTube: [https://youtu.be/D07vAxlEUS0](https://youtu.be/D07vAxlEUS0). 
 
-**[WIP] This library is work in progress, tests are required**
+**[ TODO ]**
+
+- Write tests
+- Improvements with custom decorators - if custom class decorators become supported,
+implementation could be improved. 

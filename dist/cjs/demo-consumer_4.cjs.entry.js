@@ -2,8 +2,8 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const core = require('./core-438c036f.js');
-const provide = require('./provide-1f64c90f.js');
+const index = require('./index-99071f55.js');
+const provide = require('./provide-b34d6d95.js');
 
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -21,49 +21,32 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 };
 const DemoConsumer = class {
     constructor(hostRef) {
-        core.registerInstance(this, hostRef);
+        index.registerInstance(this, hostRef);
         this.prop = null;
+        this.increase = async () => {
+            let store = await this.store;
+            let state = store.snapshot();
+            state.counter++;
+            store.patch(state);
+        };
     }
-    injectStore(store) {
-        console.log('Store injected via method injection.', store);
-    }
-    onDefaultStoreProvided(store) {
-        console.log('After store is injected, instance method is invoked.', store);
-        this.store = store;
-        this.subscription = this.store.subscribe((state) => {
-            this.counter = state.counter;
+    async componentDidLoad() {
+        let store = await this.store;
+        this.subscription = store.subscribe(() => {
+            this.counter = store.snapshot().counter;
         });
     }
     disconnectedCallback() {
         this.subscription.unsubscribe();
     }
-    increase() {
-        let state = this.store.snapshot();
-        state.counter++;
-        this.store.patch(state);
-    }
     render() {
-        return (core.h(core.Host, null, core.h("state-store-consumer", { consumer: this }), core.h("div", null, "Current value rendered from consumer component: ", core.h("span", null, this.counter)), core.h("div", null, core.h("button", { onClick: this.increase.bind(this) }, "Increase counter from consumer"))));
+        return (index.h(index.Host, null, index.h("state-store-consumer", { consumer: this }), index.h("div", null, index.h("div", null, "Current value rendered from consumer component: ", index.h("span", null, this.counter)), index.h("div", null, index.h("button", { onClick: this.increase }, "Increase counter from consumer")))));
     }
 };
 __decorate([
-    provide.Consume({
-        name: 'demo-store',
-        callback: 'onDefaultStoreProvided'
-    }),
-    __metadata("design:type", Object)
+    provide.Consume('demo-store'),
+    __metadata("design:type", Promise)
 ], DemoConsumer.prototype, "store", void 0);
-__decorate([
-    provide.Consume({
-        name: 'demo-store',
-        callback: (store) => {
-            console.log('After store is injected, callback function is invoked.', store);
-        }
-    }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], DemoConsumer.prototype, "injectStore", null);
 
 var __decorate$1 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -81,7 +64,12 @@ var __metadata$1 = (undefined && undefined.__metadata) || function (k, v) {
 };
 const DemoProvider = class {
     constructor(hostRef) {
-        core.registerInstance(this, hostRef);
+        index.registerInstance(this, hostRef);
+        this.increase = () => {
+            let state = this.store.snapshot();
+            state.counter++;
+            this.store.patch(state);
+        };
     }
     connectedCallback() {
         this.subscription = this.store.subscribe((state) => {
@@ -91,21 +79,16 @@ const DemoProvider = class {
     disconnectedCallback() {
         this.subscription.unsubscribe();
     }
-    increase() {
-        let state = this.store.snapshot();
-        state.counter++;
-        this.store.patch(state);
-    }
     render() {
-        return (core.h("state-store-provider", { provider: this }, core.h("div", null, "Current value rendered from provider component: ", core.h("span", null, this.counter)), core.h("div", null, core.h("button", { onClick: this.increase.bind(this) }, "Increase counter from provider")), core.h("slot", null)));
+        return (index.h(index.Host, null, index.h("state-store-provider", { provider: this }), index.h("slot", null), index.h("div", null, index.h("div", null, "Current value rendered from provider component: ", index.h("span", null, this.counter)), index.h("div", null, index.h("button", { onClick: this.increase }, "Increase counter from provider")))));
     }
 };
 __decorate$1([
     provide.Provide({
         name: 'demo-store',
         defaults: {
-            counter: 1
-        }
+            counter: 1,
+        },
     }),
     __metadata$1("design:type", Object)
 ], DemoProvider.prototype, "store", void 0);
@@ -147,7 +130,7 @@ class Registry {
 
 const Consumer = class {
     constructor(hostRef) {
-        core.registerInstance(this, hostRef);
+        index.registerInstance(this, hostRef);
         /**
          * List of all requested stores.
          */
@@ -156,7 +139,7 @@ const Consumer = class {
          * Subscription to provider Registry.
          */
         this.subscription = null;
-        this.request = core.createEvent(this, "runopencode:store:consumer:request", 7);
+        this.request = index.createEvent(this, "runopencode:store:consumer:request", 7);
     }
     /**
      * When consumer is added to DOM, stores are required from provider(s).
@@ -185,9 +168,6 @@ const Consumer = class {
         }
         this.requests = [];
     }
-    render() {
-        return (core.h("slot", null));
-    }
     /**
      * For each request for store from the list,
      * fire request event which will bubble up to the provider,
@@ -215,11 +195,24 @@ const Consumer = class {
             this.subscription = null;
         }
     }
+    render() {
+        return (index.h(index.Host, null, index.h("slot", null)));
+    }
 };
 
 const Provider = class {
     constructor(hostRef) {
-        core.registerInstance(this, hostRef);
+        index.registerInstance(this, hostRef);
+        this.onStoreRequested = (event) => {
+            let request = event.detail;
+            if (!this.stores.has(request.name)) {
+                return;
+            }
+            event.stopPropagation();
+            event.preventDefault();
+            let store = this.stores.get(request.name);
+            request.consumer[request.property].resolve(store);
+        };
     }
     /**
      * Get list of registered stores from provider
@@ -227,33 +220,26 @@ const Provider = class {
      * requests.
      */
     connectedCallback() {
+        let children = Array.from(this.el.childNodes).filter((element) => {
+            return '#comment' !== element.nodeName;
+        });
+        let hasChildren = 0 !== children.length;
+        let target = this.el;
+        if (!hasChildren) {
+            target = this.el.parentElement;
+        }
+        target.addEventListener('runopencode:store:consumer:request', this.onStoreRequested);
         this.stores = provide.getRegisteredStores(this.provider);
         Registry.getInstance().notify();
     }
-    /**
-     * Listen for store requests.
-     */
-    onRequest(event) {
-        let request = event.detail;
-        if (!this.stores.has(request.name)) {
-            return;
-        }
-        event.stopPropagation();
-        event.preventDefault();
-        let store = this.stores.get(request.name);
-        if (request.property) {
-            request.consumer[request.property] = store;
-        }
-        if (request.method) {
-            request.method.apply(request.consumer, [store]);
-        }
-        if (request.callback) {
-            request.callback.apply(request.consumer, [store]);
-        }
+    disconnectedCallback() {
+        this.el.removeEventListener('runopencode:store:consumer:request', this.onStoreRequested);
+        this.el.parentElement.removeEventListener('runopencode:store:consumer:request', this.onStoreRequested);
     }
     render() {
-        return (core.h("slot", null));
+        return (index.h(index.Host, null, index.h("slot", null)));
     }
+    get el() { return index.getElement(this); }
 };
 
 exports.demo_consumer = DemoConsumer;

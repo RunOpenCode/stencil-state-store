@@ -1,8 +1,10 @@
-export declare class Provider {
+import { ComponentInterface, h } from '@stencil/core';
+export declare class Provider implements ComponentInterface {
     /**
      * Providing component
      */
-    provider: any;
+    provider: ComponentInterface;
+    private el;
     /**
      * Stores available for consumers to be requested.
      */
@@ -13,9 +15,7 @@ export declare class Provider {
      * requests.
      */
     connectedCallback(): void;
-    /**
-     * Listen for store requests.
-     */
-    onRequest(event: CustomEvent): void;
-    render(): any;
+    disconnectedCallback(): void;
+    private onStoreRequested;
+    render(): h.JSX.IntrinsicElements;
 }

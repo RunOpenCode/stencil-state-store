@@ -1,4 +1,4 @@
-import {StoreInterface} from "../store/store.interface";
+import { ComponentInterface } from '@stencil/core';
 
 /**
  * Request for state store emitted by consumer.
@@ -11,37 +11,23 @@ export class Request {
     private readonly _name: string;
 
     /**
-     * Reference to consuming component.
-     */
-    private readonly _consumer: any;
-
-    /**
      * Property which will accept store.
      */
-    private readonly _property: string | null;
+    private readonly _property: string;
 
     /**
-     * Method which will accept store.
+     * Reference to consuming component.
      */
-    private readonly _method: ((store?: StoreInterface<any>) => void) | null;
-
-    /**
-     * Callback which will be invoked after store is provided.
-     */
-    private readonly _callback: ((store?: StoreInterface<any>) => void) | null;
+    private readonly _consumer: ComponentInterface;
 
     constructor(
         name: string,
-        consumer: any,
-        property: string | null,
-        method: ((store?: StoreInterface<any>) => void) | null,
-        callback: ((store?: StoreInterface<any>) => void) | null
+        property: string,
+        consumer: ComponentInterface,
     ) {
         this._name     = name;
-        this._consumer = consumer;
         this._property = property;
-        this._method   = method;
-        this._callback = callback;
+        this._consumer = consumer;
     }
 
     public get name(): string {
@@ -54,13 +40,5 @@ export class Request {
 
     public get property(): string | null {
         return this._property;
-    }
-
-    public get method(): ((store?: StoreInterface<any>) => void) | null {
-        return this._method;
-    }
-
-    public get callback(): ((store?: StoreInterface<any>) => void) | null {
-        return this._callback;
     }
 }

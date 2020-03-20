@@ -1,5 +1,5 @@
-import { Store } from "../store/store";
-const storesRegistryKey = Symbol('@runopencode:state:provide:registry');
+import { Store } from '../store/store';
+const storesRegistryKey = '@runopencode:state:provide:registry';
 /**
  * Provide decorator, denotes state store that is available for consumption.
  */
@@ -16,11 +16,11 @@ export function Provide(options) {
                     Object.defineProperty(this, field, {
                         value: new Store(options.defaults),
                         enumerable: false,
-                        writable: false
+                        writable: false,
                     });
                 }
                 return this[field];
-            }
+            },
         });
         let registeredStores = Reflect.getMetadata(storesRegistryKey, target) || new Map();
         registeredStores.set(options.name, propertyKey);

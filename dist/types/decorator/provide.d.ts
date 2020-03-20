@@ -1,4 +1,5 @@
-import { StoreInterface } from "../store/store.interface";
+import { ComponentInterface } from '@stencil/core';
+import { StoreInterface } from '../store/store.interface';
 /**
  * Provide decorator options.
  */
@@ -8,7 +9,7 @@ export interface ProvideOptions {
      */
     name: string;
     /**
-     * Inital store values.
+     * Initial store values.
      */
     defaults: {
         [key: string]: any;
@@ -17,7 +18,7 @@ export interface ProvideOptions {
 /**
  * Provide decorator, denotes state store that is available for consumption.
  */
-export declare function Provide(options: ProvideOptions): (target: any, propertyKey: string) => void;
+export declare function Provide(options: ProvideOptions): (target: ComponentInterface, propertyKey: string) => void;
 /**
  * Get all state stores provided by component instance.
  */

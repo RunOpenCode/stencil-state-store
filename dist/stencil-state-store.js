@@ -13,14 +13,16 @@
   var scriptElm = doc.createElement('script');
   scriptElm.setAttribute('type', 'module');
   scriptElm.src = url + '/stencil-state-store.esm.js';
-  doc.head.appendChild(scriptElm);
   warn.push(scriptElm.outerHTML);
+  scriptElm.setAttribute('data-stencil-namespace', 'stencil-state-store');
+  doc.head.appendChild(scriptElm);
 
   scriptElm = doc.createElement('script');
   scriptElm.setAttribute('nomodule', '');
   scriptElm.src = url + '/stencil-state-store.js';
-  doc.head.appendChild(scriptElm);
   warn.push(scriptElm.outerHTML);
+  scriptElm.setAttribute('data-stencil-namespace', 'stencil-state-store');
+  doc.head.appendChild(scriptElm);
 
   console.warn(warn.join('\n'));
 

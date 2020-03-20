@@ -1,15 +1,33 @@
-import { Request } from "../utils/request";
-const metadataRegistryKey = Symbol('@runopencode:state:consume:requests');
+import { Deferred } from '../utils/deferred';
+import { Request } from '../utils/request';
+const metadataRegistryKey = '@runopencode:state:consume:requests';
 /**
- * Consume decorator, denotes state store which has to be provided to property/method.
+ * Consume decorator, denotes state store which has to be provided to property.
+ *
+ * @param {string} name Name of the store to consume.
  */
-export function Consume(options) {
-    return function decoratorFactory(target, propertyKey, propertyDescriptior) {
-        options = Object.assign({ callback: null }, (options));
+export function Consume(name) {
+    return function decoratorFactory(target, propertyKey) {
         let metadata = Reflect.getMetadata(metadataRegistryKey, target) || [];
-        let descriptor = new Metadata(options.name, propertyKey, options.callback, propertyDescriptior ? 'method' : 'property');
+        let descriptor = new Metadata(name, propertyKey);
+        let field = `__${propertyKey}__`;
         metadata.push(descriptor);
         Reflect.defineMetadata(metadataRegistryKey, metadata, target);
+        delete target.constructor.prototype[propertyKey];
+        Object.defineProperty(target.constructor.prototype, propertyKey, {
+            configurable: true,
+            enumerable: true,
+            get: function () {
+                if (!this[field]) {
+                    Object.defineProperty(this, field, {
+                        value: new Deferred(),
+                        enumerable: false,
+                        writable: false,
+                    });
+                }
+                return this[field];
+            },
+        });
     };
 }
 /**
@@ -19,11 +37,7 @@ export function getStoreRequests(instance) {
     let requests = [];
     let metadata = Reflect.getMetadata(metadataRegistryKey, instance);
     metadata.forEach((metadata) => {
-        let callback = metadata.callback;
-        if ('string' === typeof metadata.callback) {
-            callback = instance[metadata.callback];
-        }
-        let request = new Request(metadata.name, instance, 'property' === metadata.type ? metadata.property : null, 'method' === metadata.type ? instance[metadata.property] : null, callback);
+        let request = new Request(metadata.name, metadata.property, instance);
         requests.push(request);
     });
     return requests;
@@ -32,22 +46,14 @@ export function getStoreRequests(instance) {
  * Request metadata provided via decorator.
  */
 class Metadata {
-    constructor(name, property, callback, type) {
+    constructor(name, property) {
         this._name = name;
         this._property = property;
-        this._callback = callback;
-        this._type = type;
     }
     get name() {
         return this._name;
     }
     get property() {
         return this._property;
-    }
-    get callback() {
-        return this._callback;
-    }
-    get type() {
-        return this._type;
     }
 }

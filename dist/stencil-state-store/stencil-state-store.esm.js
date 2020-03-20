@@ -1,1 +1,1 @@
-import{p as e,b as o}from"./p-ec2eb55b.js";e().then(e=>o([["p-8mbm8qig",[[1,"demo-consumer",{prop:[1],counter:[32]}],[1,"demo-provider",{counter:[32]}],[4,"state-store-consumer",{consumer:[8]}],[4,"state-store-provider",{provider:[8]},[[0,"runopencode:store:consumer:request","onRequest"]]]]]],e));
+import{p as e,b as r}from"./p-fb18e78a.js";import"./p-f66b4460.js";e().then(e=>r([["p-11e40eb8",[[0,"demo-consumer",{prop:[1],counter:[32]}],[4,"demo-provider",{counter:[32]}],[4,"state-store-consumer",{consumer:[16]}],[4,"state-store-provider",{provider:[16]}]]]],e));

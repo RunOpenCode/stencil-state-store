@@ -2,12 +2,10 @@
  * Request for state store emitted by consumer.
  */
 export class Request {
-    constructor(name, consumer, property, method, callback) {
+    constructor(name, property, consumer) {
         this._name = name;
-        this._consumer = consumer;
         this._property = property;
-        this._method = method;
-        this._callback = callback;
+        this._consumer = consumer;
     }
     get name() {
         return this._name;
@@ -17,11 +15,5 @@ export class Request {
     }
     get property() {
         return this._property;
-    }
-    get method() {
-        return this._method;
-    }
-    get callback() {
-        return this._callback;
     }
 }

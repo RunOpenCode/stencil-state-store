@@ -1,7 +1,8 @@
-import {Store}          from "../store/store";
-import {StoreInterface} from "../store/store.interface";
+import { ComponentInterface } from '@stencil/core';
+import { Store }              from '../store/store';
+import { StoreInterface }     from '../store/store.interface';
 
-const storesRegistryKey = Symbol('@runopencode:state:provide:registry');
+const storesRegistryKey = '@runopencode:state:provide:registry';
 
 /**
  * Provide decorator options.
@@ -13,7 +14,7 @@ export interface ProvideOptions {
     name: string;
 
     /**
-     * Inital store values.
+     * Initial store values.
      */
     defaults: { [key: string]: any } | null;
 }
@@ -23,11 +24,11 @@ export interface ProvideOptions {
  */
 export function Provide(options: ProvideOptions) {
 
-    return function decoratorFactory(target: any, propertyKey: string) {
+    return function decoratorFactory(target: ComponentInterface, propertyKey: string) {
 
         options   = {
             ...{defaults: null},
-            ...(options)
+            ...(options),
         };
         let field = `__${propertyKey}__`;
 
@@ -42,12 +43,12 @@ export function Provide(options: ProvideOptions) {
                     Object.defineProperty(this, field, {
                         value:      new Store(options.defaults),
                         enumerable: false,
-                        writable:   false
+                        writable:   false,
                     });
                 }
 
                 return this[field];
-            }
+            },
         });
 
         let registeredStores: Map<string, string> = Reflect.getMetadata(storesRegistryKey, target) || new Map<string, string>();
@@ -64,7 +65,7 @@ export function getRegisteredStores(instance: any): Map<string, StoreInterface<a
     let registry: Map<string, string>            = Reflect.getMetadata(storesRegistryKey, instance);
     let result: Map<string, StoreInterface<any>> = new Map<string, StoreInterface<any>>();
 
-    registry.forEach(function(value: string, key: string) {
+    registry.forEach(function (value: string, key: string) {
         result.set(key, instance[value]);
     });
 

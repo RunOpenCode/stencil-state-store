@@ -1,4 +1,4 @@
-import { h } from "@stencil/core";
+import { Component, Prop, Event, Host, h } from '@stencil/core';
 import { getStoreRequests } from '../../decorator/consume';
 import { Registry } from '../../utils/registry';
 export class Consumer {
@@ -39,9 +39,6 @@ export class Consumer {
         }
         this.requests = [];
     }
-    render() {
-        return (h("slot", null));
-    }
     /**
      * For each request for store from the list,
      * fire request event which will bubble up to the provider,
@@ -69,24 +66,31 @@ export class Consumer {
             this.subscription = null;
         }
     }
+    render() {
+        return (h(Host, null,
+            h("slot", null)));
+    }
     static get is() { return "state-store-consumer"; }
     static get properties() { return {
         "consumer": {
-            "type": "any",
+            "type": "unknown",
             "mutable": false,
             "complexType": {
-                "original": "any",
-                "resolved": "any",
-                "references": {}
+                "original": "ComponentInterface",
+                "resolved": "ComponentInterface",
+                "references": {
+                    "ComponentInterface": {
+                        "location": "import",
+                        "path": "@stencil/core"
+                    }
+                }
             },
             "required": true,
             "optional": false,
             "docs": {
                 "tags": [],
                 "text": "Consuming component."
-            },
-            "attribute": "consumer",
-            "reflect": false
+            }
         }
     }; }
     static get events() { return [{

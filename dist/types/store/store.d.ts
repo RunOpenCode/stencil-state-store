@@ -16,7 +16,7 @@ export declare class Store<T> implements StoreInterface<T> {
     /**
      * @inheritdoc
      */
-    readonly observer: Observable<T>;
+    get observer(): Observable<T>;
     /**
      * @inheritDoc
      */

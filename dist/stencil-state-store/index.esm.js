@@ -1,0 +1,1 @@
+export{C as Consume,P as Provide}from"./p-7a9a9943.js";
