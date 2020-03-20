@@ -6,7 +6,7 @@ import { State as ComponentState }                       from './state';
 
 @Component({
     tag:    'demo-provider',
-    shadow: false,
+    shadow: true,
 })
 export class DemoProvider implements ComponentInterface {
 

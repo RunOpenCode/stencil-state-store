@@ -26,7 +26,7 @@ export class Provider {
         let hasChildren = 0 !== children.length;
         let target = this.el;
         if (!hasChildren) {
-            target = this.el.parentElement;
+            target = (this.el.parentNode);
         }
         target.addEventListener('runopencode:store:consumer:request', this.onStoreRequested);
         this.stores = getRegisteredStores(this.provider);

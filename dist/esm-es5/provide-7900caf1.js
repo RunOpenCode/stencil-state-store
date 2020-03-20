@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Deferred/promise object through which store will be provided.
  */
@@ -975,8 +973,12 @@ function Provide(options) {
             enumerable: true,
             get: function () {
                 if (!this[field]) {
+                    let defaults = options.defaults;
+                    if (options.defaults instanceof Function) {
+                        defaults = defaults();
+                    }
                     Object.defineProperty(this, field, {
-                        value: new Store(options.defaults),
+                        value: new Store(defaults),
                         enumerable: false,
                         writable: false,
                     });
@@ -1001,8 +1003,4 @@ function getRegisteredStores(instance) {
     return result;
 }
 
-exports.Consume = Consume;
-exports.Provide = Provide;
-exports.Subject = Subject;
-exports.getRegisteredStores = getRegisteredStores;
-exports.getStoreRequests = getStoreRequests;
+export { Consume as C, Provide as P, Subject as S, getRegisteredStores as a, getStoreRequests as g };

@@ -973,8 +973,12 @@ function Provide(options) {
             enumerable: true,
             get: function () {
                 if (!this[field]) {
+                    let defaults = options.defaults;
+                    if (options.defaults instanceof Function) {
+                        defaults = defaults();
+                    }
                     Object.defineProperty(this, field, {
-                        value: new Store(options.defaults),
+                        value: new Store(defaults),
                         enumerable: false,
                         writable: false,
                     });

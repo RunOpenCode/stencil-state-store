@@ -39,6 +39,7 @@ export class DemoConsumer {
                     h("button", { onClick: this.increase }, "Increase counter from consumer")))));
     }
     static get is() { return "demo-consumer"; }
+    static get encapsulation() { return "shadow"; }
     static get properties() { return {
         "prop": {
             "type": "string",

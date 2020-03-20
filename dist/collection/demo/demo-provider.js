@@ -37,6 +37,7 @@ export class DemoProvider {
                     h("button", { onClick: this.increase }, "Increase counter from provider")))));
     }
     static get is() { return "demo-provider"; }
+    static get encapsulation() { return "shadow"; }
     static get states() { return {
         "counter": {}
     }; }

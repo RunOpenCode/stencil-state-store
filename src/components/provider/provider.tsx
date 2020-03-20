@@ -38,7 +38,7 @@ export class Provider implements ComponentInterface {
         let target: HTMLElement     = this.el;
 
         if (!hasChildren) {
-            target = this.el.parentElement as HTMLElement;
+            target = (this.el.parentNode) as HTMLElement;
         }
 
         target.addEventListener('runopencode:store:consumer:request', this.onStoreRequested);

@@ -1,5 +1,5 @@
-import { r as registerInstance, h, H as Host, c as createEvent, g as getElement } from './index-01cbb744.js';
-import { C as Consume, P as Provide, S as Subject, g as getStoreRequests, a as getRegisteredStores } from './provide-52031a5b.js';
+import { r as registerInstance, h, H as Host, c as createEvent, g as getElement } from './index-f28230a3.js';
+import { C as Consume, P as Provide, S as Subject, g as getStoreRequests, a as getRegisteredStores } from './provide-7900caf1.js';
 
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -222,7 +222,7 @@ const Provider = class {
         let hasChildren = 0 !== children.length;
         let target = this.el;
         if (!hasChildren) {
-            target = this.el.parentElement;
+            target = (this.el.parentNode);
         }
         target.addEventListener('runopencode:store:consumer:request', this.onStoreRequested);
         this.stores = getRegisteredStores(this.provider);

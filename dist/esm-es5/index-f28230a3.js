@@ -1,5 +1,6 @@
 const NAMESPACE = 'stencil-state-store';
 
+let scopeId;
 let contentRef;
 let hostTagName;
 let useNativeShadowDom = false;
@@ -19,6 +20,8 @@ const plt = {
     ael: (el, eventName, listener, opts) => el.addEventListener(eventName, listener, opts),
     rel: (el, eventName, listener, opts) => el.removeEventListener(eventName, listener, opts),
 };
+const supportsShadow =  /*@__PURE__*/ (() => (doc.head.attachShadow + '').indexOf('[native') > -1)()
+    ;
 const promiseResolve = (v) => Promise.resolve(v);
 const HYDRATED_CSS = '{visibility:hidden}.hydrated{visibility:inherit}';
 const createTime = (fnName, tagName = '') => {
@@ -39,6 +42,7 @@ const uniqueTime = (key, measureText) => {
  * Don't add values to these!!
  */
 const EMPTY_OBJ = {};
+const isDef = (v) => v != null;
 const isComplexType = (o) => {
     // https://jsperf.com/typeof-fn-object/5
     o = typeof o;
@@ -237,6 +241,10 @@ const createElm = (oldParentVNode, newParentVNode, childIndex, parentElm) => {
         // remember for later we need to check to relocate nodes
         checkSlotRelocate = true;
         if (newVNode.$tag$ === 'slot') {
+            if (scopeId) {
+                // scoped css needs to add its scoped id to the parent element
+                parentElm.classList.add(scopeId + '-s');
+            }
             newVNode.$flags$ |= (newVNode.$children$)
                 // slot element has fallback content
                 // still create an element that "mocks" the slot element
@@ -262,10 +270,15 @@ const createElm = (oldParentVNode, newParentVNode, childIndex, parentElm) => {
         {
             updateElement(null, newVNode, isSvgMode);
         }
+        if ( isDef(scopeId) && elm['s-si'] !== scopeId) {
+            // if there is a scopeId and this is the initial render
+            // then let's add the scopeId as a css class
+            elm.classList.add((elm['s-si'] = scopeId));
+        }
         if (newVNode.$children$) {
             for (i = 0; i < newVNode.$children$.length; ++i) {
                 // create the node
-                childNode = createElm(oldParentVNode, newVNode, i);
+                childNode = createElm(oldParentVNode, newVNode, i, elm);
                 // return node could have been null
                 if (childNode) {
                     // append our new node
@@ -321,9 +334,12 @@ const putBackInOriginalLocation = (parentElm, recursive) => {
 const addVnodes = (parentElm, before, parentVNode, vnodes, startIdx, endIdx) => {
     let containerElm = (( parentElm['s-cr'] && parentElm['s-cr'].parentNode) || parentElm);
     let childNode;
+    if ( containerElm.shadowRoot && containerElm.tagName === hostTagName) {
+        containerElm = containerElm.shadowRoot;
+    }
     for (; startIdx <= endIdx; ++startIdx) {
         if (vnodes[startIdx]) {
-            childNode = createElm(null, parentVNode, startIdx);
+            childNode = createElm(null, parentVNode, startIdx, parentElm);
             if (childNode) {
                 vnodes[startIdx].$elm$ = childNode;
                 containerElm.insertBefore(childNode,  referenceNode(before) );
@@ -411,7 +427,7 @@ const updateChildren = (parentElm, oldCh, newVNode, newCh) => {
         else {
             {
                 // new element
-                node = createElm(oldCh && oldCh[newStartIdx], newVNode, newStartIdx);
+                node = createElm(oldCh && oldCh[newStartIdx], newVNode, newStartIdx, parentElm);
                 newStartVnode = newCh[++newStartIdx];
             }
             if (node) {
@@ -638,10 +654,13 @@ const renderVdom = (hostRef, renderFnResults) => {
     rootVnode.$tag$ = null;
     rootVnode.$flags$ |= 4 /* isHost */;
     hostRef.$vnode$ = rootVnode;
-    rootVnode.$elm$ = oldVNode.$elm$ = ( hostElm);
+    rootVnode.$elm$ = oldVNode.$elm$ = ( hostElm.shadowRoot || hostElm );
+    {
+        scopeId = hostElm['s-sc'];
+    }
     {
         contentRef = hostElm['s-cr'];
-        useNativeShadowDom =  (cmpMeta.$flags$ & 1 /* shadowDomEncapsulation */) !== 0;
+        useNativeShadowDom = supportsShadow && (cmpMeta.$flags$ & 1 /* shadowDomEncapsulation */) !== 0;
         // always reset
         checkSlotFallbackVisibility = false;
     }
@@ -1160,6 +1179,9 @@ const bootstrapLazy = (lazyBundles, options = {}) => {
         {
             cmpMeta.$members$ = compactMeta[2];
         }
+        if ( !supportsShadow && cmpMeta.$flags$ & 1 /* shadowDomEncapsulation */) {
+            cmpMeta.$flags$ |= 8 /* needsShadowDomShim */;
+        }
         const tagName = cmpMeta.$tagName$;
         const HostElement = class extends HTMLElement {
             // StencilLazyHost
@@ -1168,6 +1190,20 @@ const bootstrapLazy = (lazyBundles, options = {}) => {
                 super(self);
                 self = this;
                 registerHost(self, cmpMeta);
+                if ( cmpMeta.$flags$ & 1 /* shadowDomEncapsulation */) {
+                    // this component is using shadow dom
+                    // and this browser supports shadow dom
+                    // add the read-only property "shadowRoot" to the host element
+                    // adding the shadow root build conditionals to minimize runtime
+                    if (supportsShadow) {
+                        {
+                            self.attachShadow({ mode: 'open' });
+                        }
+                    }
+                    else if ( !('shadowRoot' in self)) {
+                        self.shadowRoot = self;
+                    }
+                }
             }
             connectedCallback() {
                 if (appLoadFallback) {

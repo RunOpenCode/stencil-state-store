@@ -1,1 +1,1 @@
-import{p as e,b as r}from"./p-fb18e78a.js";import"./p-f66b4460.js";e().then(e=>r([["p-11e40eb8",[[0,"demo-consumer",{prop:[1],counter:[32]}],[4,"demo-provider",{counter:[32]}],[4,"state-store-consumer",{consumer:[16]}],[4,"state-store-provider",{provider:[16]}]]]],e));
+import{p as r,b as o}from"./p-26f39649.js";import"./p-f66b4460.js";r().then(r=>o([["p-e060fbd8",[[1,"demo-consumer",{prop:[1],counter:[32]}],[1,"demo-provider",{counter:[32]}],[4,"state-store-consumer",{consumer:[16]}],[4,"state-store-provider",{provider:[16]}]]]],r));

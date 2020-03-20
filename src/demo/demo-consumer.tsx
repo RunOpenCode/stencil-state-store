@@ -6,7 +6,7 @@ import { State as ComponentState }                             from './state';
 
 @Component({
     tag:    'demo-consumer',
-    shadow: false,
+    shadow: true,
 })
 export class DemoConsumer implements ComponentInterface {
 

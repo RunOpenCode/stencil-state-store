@@ -2,7 +2,7 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const provide = require('./provide-b34d6d95.js');
+const provide = require('./provide-f51d8b90.js');
 
 
 

@@ -2,8 +2,8 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const index = require('./index-99071f55.js');
-const provide = require('./provide-b34d6d95.js');
+const index = require('./index-78e1c489.js');
+const provide = require('./provide-f51d8b90.js');
 
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -226,7 +226,7 @@ const Provider = class {
         let hasChildren = 0 !== children.length;
         let target = this.el;
         if (!hasChildren) {
-            target = this.el.parentElement;
+            target = (this.el.parentNode);
         }
         target.addEventListener('runopencode:store:consumer:request', this.onStoreRequested);
         this.stores = provide.getRegisteredStores(this.provider);
