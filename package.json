@@ -1,6 +1,6 @@
 {
     "name": "@runopencode/stencil-state-store",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Light state store management for Stencil",
     "main": "dist/index.js",
     "module": "dist/index.mjs",

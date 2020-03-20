@@ -166,6 +166,8 @@ public store: Store<CarouselState>;
 
 ````
 
+Note that `defaults` may be a function which creates new default state.
+
 That component must use `state-store-provider` component, with `provider` property referencing 
 to `this` when rendering component.
 
