@@ -26,6 +26,11 @@ export class Provider implements ComponentInterface {
     private stores: Map<string, StoreInterface<any>>;
 
     /**
+     * DOM element which listens to a request event.
+     */
+    private handler: HTMLElement;
+
+    /**
      * Get list of registered stores from provider
      * and notify registry that provider is ready for
      * requests.
@@ -35,21 +40,20 @@ export class Provider implements ComponentInterface {
             return '#comment' !== element.nodeName;
         }) as HTMLElement[];
         let hasChildren: boolean    = 0 !== children.length;
-        let target: HTMLElement     = this.el;
+        this.handler                = this.el;
 
         if (!hasChildren) {
-            target = (this.el.parentNode) as HTMLElement;
+            this.handler = (this.el.parentNode) as HTMLElement;
         }
 
-        target.addEventListener('runopencode:store:consumer:request', this.onStoreRequested);
+        this.handler.addEventListener('runopencode:store:consumer:request', this.onStoreRequested);
 
         this.stores = getRegisteredStores(this.provider);
         Registry.getInstance().notify();
     }
 
     public disconnectedCallback(): void {
-        this.el.removeEventListener('runopencode:store:consumer:request', this.onStoreRequested);
-        this.el.parentElement.removeEventListener('runopencode:store:consumer:request', this.onStoreRequested);
+        this.handler.removeEventListener('runopencode:store:consumer:request', this.onStoreRequested);
     }
 
     private onStoreRequested = (event: CustomEvent): void => {

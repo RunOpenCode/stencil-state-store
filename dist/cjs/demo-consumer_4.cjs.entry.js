@@ -224,17 +224,16 @@ const Provider = class {
             return '#comment' !== element.nodeName;
         });
         let hasChildren = 0 !== children.length;
-        let target = this.el;
+        this.handler = this.el;
         if (!hasChildren) {
-            target = (this.el.parentNode);
+            this.handler = (this.el.parentNode);
         }
-        target.addEventListener('runopencode:store:consumer:request', this.onStoreRequested);
+        this.handler.addEventListener('runopencode:store:consumer:request', this.onStoreRequested);
         this.stores = provide.getRegisteredStores(this.provider);
         Registry.getInstance().notify();
     }
     disconnectedCallback() {
-        this.el.removeEventListener('runopencode:store:consumer:request', this.onStoreRequested);
-        this.el.parentElement.removeEventListener('runopencode:store:consumer:request', this.onStoreRequested);
+        this.handler.removeEventListener('runopencode:store:consumer:request', this.onStoreRequested);
     }
     render() {
         return (index.h(index.Host, null, index.h("slot", null)));

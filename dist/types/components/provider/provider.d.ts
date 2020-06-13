@@ -10,6 +10,10 @@ export declare class Provider implements ComponentInterface {
      */
     private stores;
     /**
+     * DOM element which listens to a request event.
+     */
+    private handler;
+    /**
      * Get list of registered stores from provider
      * and notify registry that provider is ready for
      * requests.
