@@ -1,6 +1,6 @@
 import { Component, Prop, State, Host, h, ComponentInterface } from '@stencil/core';
 import { Unsubscribable }                                      from 'rxjs';
-import { Consume }                                             from '../decorator/consume';
+import { Consume }                                             from '..';
 import { StoreInterface as Store }                             from '../store/store.interface';
 import { State as ComponentState }                             from './state';
 

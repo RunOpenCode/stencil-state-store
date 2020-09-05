@@ -95,7 +95,7 @@ export class Consumer {
     }; }
     static get events() { return [{
             "method": "request",
-            "name": "runopencode:store:consumer:request",
+            "name": "stateStoreConsumerRequest",
             "bubbles": true,
             "cancelable": true,
             "composed": true,

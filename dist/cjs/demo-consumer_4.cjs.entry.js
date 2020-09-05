@@ -3,7 +3,7 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 const index = require('./index-78e1c489.js');
-const provide = require('./provide-f51d8b90.js');
+const index$1 = require('./index-82c67221.js');
 
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -44,7 +44,7 @@ const DemoConsumer = class {
     }
 };
 __decorate([
-    provide.Consume('demo-store'),
+    index$1.Consume('demo-store'),
     __metadata("design:type", Promise)
 ], DemoConsumer.prototype, "store", void 0);
 
@@ -84,7 +84,7 @@ const DemoProvider = class {
     }
 };
 __decorate$1([
-    provide.Provide({
+    index$1.Provide({
         name: 'demo-store',
         defaults: {
             counter: 1,
@@ -103,7 +103,7 @@ class Registry {
         /**
          * Observable subject which notifies about new provider.
          */
-        this._subject = new provide.Subject();
+        this._subject = new index$1.Subject();
     }
     /**
      * Subscribe for provider registration event.
@@ -139,7 +139,7 @@ const Consumer = class {
          * Subscription to provider Registry.
          */
         this.subscription = null;
-        this.request = index.createEvent(this, "runopencode:store:consumer:request", 7);
+        this.request = index.createEvent(this, "stateStoreConsumerRequest", 7);
     }
     /**
      * When consumer is added to DOM, stores are required from provider(s).
@@ -148,7 +148,7 @@ const Consumer = class {
      * wait until provider is available.
      */
     connectedCallback() {
-        this.requests = provide.getStoreRequests(this.consumer);
+        this.requests = index$1.getStoreRequests(this.consumer);
         this.require();
         if (0 === this.requests.length) {
             return;
@@ -228,12 +228,12 @@ const Provider = class {
         if (!hasChildren) {
             this.handler = (this.el.parentNode);
         }
-        this.handler.addEventListener('runopencode:store:consumer:request', this.onStoreRequested);
-        this.stores = provide.getRegisteredStores(this.provider);
+        this.handler.addEventListener('stateStoreConsumerRequest', this.onStoreRequested);
+        this.stores = index$1.getRegisteredStores(this.provider);
         Registry.getInstance().notify();
     }
     disconnectedCallback() {
-        this.handler.removeEventListener('runopencode:store:consumer:request', this.onStoreRequested);
+        this.handler.removeEventListener('stateStoreConsumerRequest', this.onStoreRequested);
     }
     render() {
         return (index.h(index.Host, null, index.h("slot", null)));

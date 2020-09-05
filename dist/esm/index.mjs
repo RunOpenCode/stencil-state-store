@@ -1,1 +1,1 @@
-export { C as Consume, P as Provide } from './provide-7900caf1.js';
+export { C as Consume, P as Provide } from './index-b8620745.js';

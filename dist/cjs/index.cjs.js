@@ -2,9 +2,9 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const provide = require('./provide-f51d8b90.js');
+const index$1 = require('./index-82c67221.js');
 
 
 
-exports.Consume = provide.Consume;
-exports.Provide = provide.Provide;
+exports.Consume = index$1.Consume;
+exports.Provide = index$1.Provide;

@@ -20,7 +20,7 @@ export class Consumer implements ComponentInterface {
      * Request for store event.
      */
     @Event({
-        eventName:  'runopencode:store:consumer:request',
+        eventName:  'stateStoreConsumerRequest',
         bubbles:    true,
         composed:   true,
         cancelable: true,

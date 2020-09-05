@@ -1,5 +1,5 @@
 import { r as registerInstance, h, H as Host, c as createEvent, g as getElement } from './index-f28230a3.js';
-import { C as Consume, P as Provide, S as Subject, g as getStoreRequests, a as getRegisteredStores } from './provide-7900caf1.js';
+import { C as Consume, P as Provide, S as Subject, g as getStoreRequests, a as getRegisteredStores } from './index-b8620745.js';
 
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -135,7 +135,7 @@ const Consumer = class {
          * Subscription to provider Registry.
          */
         this.subscription = null;
-        this.request = createEvent(this, "runopencode:store:consumer:request", 7);
+        this.request = createEvent(this, "stateStoreConsumerRequest", 7);
     }
     /**
      * When consumer is added to DOM, stores are required from provider(s).
@@ -224,12 +224,12 @@ const Provider = class {
         if (!hasChildren) {
             this.handler = (this.el.parentNode);
         }
-        this.handler.addEventListener('runopencode:store:consumer:request', this.onStoreRequested);
+        this.handler.addEventListener('stateStoreConsumerRequest', this.onStoreRequested);
         this.stores = getRegisteredStores(this.provider);
         Registry.getInstance().notify();
     }
     disconnectedCallback() {
-        this.handler.removeEventListener('runopencode:store:consumer:request', this.onStoreRequested);
+        this.handler.removeEventListener('stateStoreConsumerRequest', this.onStoreRequested);
     }
     render() {
         return (h(Host, null, h("slot", null)));

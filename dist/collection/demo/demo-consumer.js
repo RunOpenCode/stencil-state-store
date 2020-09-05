@@ -8,7 +8,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 import { Component, Prop, State, Host, h } from '@stencil/core';
-import { Consume } from '../decorator/consume';
+import { Consume } from '..';
 export class DemoConsumer {
     constructor() {
         this.prop = null;

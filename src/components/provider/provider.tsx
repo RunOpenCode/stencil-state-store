@@ -46,14 +46,14 @@ export class Provider implements ComponentInterface {
             this.handler = (this.el.parentNode) as HTMLElement;
         }
 
-        this.handler.addEventListener('runopencode:store:consumer:request', this.onStoreRequested);
+        this.handler.addEventListener('stateStoreConsumerRequest', this.onStoreRequested);
 
         this.stores = getRegisteredStores(this.provider);
         Registry.getInstance().notify();
     }
 
     public disconnectedCallback(): void {
-        this.handler.removeEventListener('runopencode:store:consumer:request', this.onStoreRequested);
+        this.handler.removeEventListener('stateStoreConsumerRequest', this.onStoreRequested);
     }
 
     private onStoreRequested = (event: CustomEvent): void => {

@@ -28,12 +28,12 @@ export class Provider {
         if (!hasChildren) {
             this.handler = (this.el.parentNode);
         }
-        this.handler.addEventListener('runopencode:store:consumer:request', this.onStoreRequested);
+        this.handler.addEventListener('stateStoreConsumerRequest', this.onStoreRequested);
         this.stores = getRegisteredStores(this.provider);
         Registry.getInstance().notify();
     }
     disconnectedCallback() {
-        this.handler.removeEventListener('runopencode:store:consumer:request', this.onStoreRequested);
+        this.handler.removeEventListener('stateStoreConsumerRequest', this.onStoreRequested);
     }
     render() {
         return (h(Host, null,

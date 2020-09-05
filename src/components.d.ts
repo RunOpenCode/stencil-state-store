@@ -71,7 +71,7 @@ declare namespace LocalJSX {
         /**
           * Request for store event.
          */
-        "onRunopencode:store:consumer:request"?: (event: CustomEvent<any>) => void;
+        "onStateStoreConsumerRequest"?: (event: CustomEvent<any>) => void;
     }
     interface StateStoreProvider {
         /**
